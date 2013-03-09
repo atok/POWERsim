@@ -1,6 +1,35 @@
 *.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
+
+# intellij idea
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# eclipse
+
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
