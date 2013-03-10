@@ -22,6 +22,12 @@ public class ExampleActor extends UntypedActor {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
             log.warning("Received time event: " + t);
 
+            // #########################################################
+            // #  DO NOT DO THIS!!!!!                                  #
+            // #  Actor should not affect the thread its using.        #
+            // #  Be a good citizen and don't exhaust the thread pool  #
+            // #  PS. for time dependent things use TimeSignals        #
+            // #########################################################
             int timeToSleep = 1000 + (new Random()).nextInt(3000);
             log.warning("Sleeping: " + timeToSleep);
             Thread.sleep(timeToSleep);
