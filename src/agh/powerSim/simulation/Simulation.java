@@ -1,10 +1,7 @@
 package agh.powerSim.simulation;
 
 import agh.powerSim.simulation.actors.ClockActor;
-import akka.actor.Actor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
+import akka.actor.*;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import org.joda.time.LocalDateTime;
@@ -24,6 +21,10 @@ public class Simulation {
 
     public void addActor(Class<? extends Actor> actorClass, String name) {
         system.actorOf(new Props(actorClass), name);
+    }
+
+    public void addActor(Props props, String name, Class<? extends Actor> levelClass) {
+        system.actorOf(props, name);
     }
 
     public void start() {
