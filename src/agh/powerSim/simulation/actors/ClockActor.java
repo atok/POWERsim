@@ -82,8 +82,7 @@ public class ClockActor extends UntypedActor {
 
     private void markActorAsReady(ActorRef actor) {
         registeredActors.get(actor).ready = true;
-        log.warning("Actor done: " + getSender());
-
+//        log.warning("Actor done: " + getSender());
         tryToSendTimeSignal();  // TODO optimization (no need to check every time)
     }
 
@@ -124,13 +123,13 @@ public class ClockActor extends UntypedActor {
     }
 
     public static class TimeSignal implements Serializable {
-        final long timeDelta; //seconds
-        final LocalDateTime time;
+        public final double timeDelta; //seconds
+        public final LocalDateTime time;
         /**
          * @param timeDelta time step length in seconds
          * @param time actual calendar time
          */
-        public TimeSignal(long timeDelta, LocalDateTime time) {
+        public TimeSignal(double timeDelta, LocalDateTime time) {
             this.timeDelta = timeDelta;
             this.time = time;
         }

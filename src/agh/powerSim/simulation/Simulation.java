@@ -19,12 +19,12 @@ public class Simulation {
         log = Logging.getLogger(system, this);
     }
 
-    public void addActor(Class<? extends Actor> actorClass, String name) {
-        system.actorOf(new Props(actorClass), name);
+    public ActorRef addActor(Class<? extends Actor> actorClass, String name) {
+        return system.actorOf(new Props(actorClass), name);
     }
 
-    public void addActor(Props props, String name, Class<? extends Actor> levelClass) {
-        system.actorOf(props, name);
+    public ActorRef addActor(Props props, String name) {
+        return system.actorOf(props, name);
     }
 
     public void start() {
@@ -35,6 +35,5 @@ public class Simulation {
     public void stop() {
         clockActor.tell(new ClockActor.StopSimulation());
     }
-
 
 }
