@@ -18,21 +18,14 @@ public class Lamp extends Device {
         this.house = house;
     }
 
-
-
     @Override
     public void onReceive(Object message) throws Exception {
-        if(message instanceof ClockActor.TimeSignal) {
-            ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
-            onTime(t);
-            getSender().tell(new ClockActor.DoneSignal(), getSelf());
-        } else if(message instanceof OnOffSignal) {
+        if(message instanceof OnOffSignal) {
             OnOffSignal m = (OnOffSignal)message;
             isOn = m.state;
-
-            log.warning("state = " + isOn);
+            log.warning("state := " + isOn);
         } else {
-            unhandled(message);
+            super.onReceive(message);
         }
     }
 
