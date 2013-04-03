@@ -7,7 +7,7 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-public class Lamp extends UntypedActor {
+public class Lamp extends Device {
 
     private final double powerUsage = 10;
     private final double lightGen = 10;
@@ -18,28 +18,13 @@ public class Lamp extends UntypedActor {
         this.house = house;
     }
 
-    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-
-    @Override
-    public void preStart() {
-        super.preStart();
-        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(), getSelf());
-    }
 
     @Override
     public void onReceive(Object message) throws Exception {
         if(message instanceof ClockActor.TimeSignal) {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
-
-            if(isOn) {
-                double power = powerUsage * t.timeDelta;
-                house.tell(new House.PowerUsageSignal(power));
-
-                double light = lightGen * t.timeDelta;
-                house.tell(new House.LightSignal(light));
-            }
-
+            onTime(t);
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
         } else if(message instanceof OnOffSignal) {
             OnOffSignal m = (OnOffSignal)message;
@@ -48,6 +33,16 @@ public class Lamp extends UntypedActor {
             log.warning("state = " + isOn);
         } else {
             unhandled(message);
+        }
+    }
+
+    protected void onTime(ClockActor.TimeSignal t) {
+        if(isOn) {
+            double power = powerUsage * t.timeDelta;
+            house.tell(new House.PowerUsageSignal(power));
+
+            double light = lightGen * t.timeDelta;
+            house.tell(new House.LightSignal(light));
         }
     }
 

@@ -18,30 +18,13 @@ public class Starter {
     public static void main(String [] args) {
         Simulation sim = new Simulation();
 
-        Props p1 = new Props(new UntypedActorFactory() {
-            public UntypedActor create() {
-                return new House();
-            }
-        });
-        final ActorRef house = sim.addActor(p1, "house1");
+        final ActorRef house = sim.addActor(House.class, "house-1");
+        final ActorRef lamp =  sim.addDevice(Lamp.class, "lamp-1", house);
 
-        Props p2 = new Props(new UntypedActorFactory() {
-            public UntypedActor create() {
-                return new Lamp(house);
-            }
-        });
-        final ActorRef lamp = sim.addActor(p2, "lamp");
         final ArrayList<Human.DeviceToken> devices = new ArrayList<Human.DeviceToken>();
         devices.add(new Human.DeviceToken(Lamp.class, lamp));
 
-        Props p3 = new Props(new UntypedActorFactory() {
-            public UntypedActor create() {
-                return new Human(house, devices);
-            }
-        });
-        sim.addActor(p3, "human");
-
-
+        sim.addHuman(Human.class, "human-1", house, devices);
 
         sim.addActor(ExampleActor.class, "slowdown");
         sim.start();

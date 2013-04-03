@@ -1,10 +1,18 @@
 package agh.powerSim.simulation;
 
 import agh.powerSim.simulation.actors.ClockActor;
+import agh.powerSim.simulation.actors.Human;
+import agh.powerSim.simulation.actors.devices.Device;
+import agh.powerSim.simulation.actors.devices.Lamp;
 import akka.actor.*;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import org.joda.time.LocalDateTime;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public class Simulation {
 
@@ -17,6 +25,48 @@ public class Simulation {
         system = ActorSystem.create("SimSystem");
         clockActor = system.actorOf(new Props(ClockActor.class), "clock");
         log = Logging.getLogger(system, this);
+    }
+
+    public ActorRef addHuman(final Class<? extends Human> humanClass, String name, final ActorRef house, final ArrayList<Human.DeviceToken> devices) {
+        Props props = new Props(new UntypedActorFactory() {
+            public UntypedActor create() {
+                try {
+                    Constructor<? extends Human> constructor = humanClass.getDeclaredConstructor(ActorRef.class, ArrayList.class);
+                    return constructor.newInstance(house, devices);
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                } catch (InstantiationException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        final ActorRef deviceActor = addActor(props, name);
+        return deviceActor;
+    }
+
+    public ActorRef addDevice(final Class<? extends Device> deviceClass, String name, final ActorRef house) {
+        Props props = new Props(new UntypedActorFactory() {
+            public UntypedActor create() {
+                try {
+                    Constructor<? extends Device> constructor = deviceClass.getDeclaredConstructor(ActorRef.class);
+                    return constructor.newInstance(house);
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                } catch (InstantiationException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        final ActorRef deviceActor = addActor(props, name);
+        return deviceActor;
     }
 
     public ActorRef addActor(Class<? extends Actor> actorClass, String name) {

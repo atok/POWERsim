@@ -16,7 +16,6 @@ public class House extends UntypedActor {
     double powerUsedInThisStep = 0;
     double lightProvidedInThisStep = 0;
 
-
     @Override
     public void preStart() {
         super.preStart();
@@ -61,8 +60,7 @@ public class House extends UntypedActor {
         }
     }
 
-    public static class RegisterForState {
-    }
+    public static class RegisterForState {}
 
     public static class PowerUsageSignal {
         public final double powerUsed;
