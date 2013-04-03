@@ -1,13 +1,23 @@
 package agh.powerSim.simulation.actors.devices;
 
 import agh.powerSim.simulation.actors.ClockActor;
+import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-public abstract class Device extends UntypedActor {
+public abstract class BaseDevice extends UntypedActor {
 
-    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    protected LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+    private final ActorRef house;
+    public BaseDevice( ActorRef house) {
+        this.house = house;
+    }
+
+    protected ActorRef getHouse() {
+        return house;
+    }
 
     @Override
     public void preStart() {
@@ -21,6 +31,8 @@ public abstract class Device extends UntypedActor {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
             onTime(t);
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
+        } else {
+            unhandled(message);
         }
     }
 

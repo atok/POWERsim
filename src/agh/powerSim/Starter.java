@@ -2,14 +2,11 @@ package agh.powerSim;
 
 
 import agh.powerSim.simulation.Simulation;
-import agh.powerSim.simulation.actors.ExampleActor;
+import agh.powerSim.simulation.actors.SleepActor;
 import agh.powerSim.simulation.actors.House;
-import agh.powerSim.simulation.actors.Human;
+import agh.powerSim.simulation.actors.humans.Human;
 import agh.powerSim.simulation.actors.devices.Lamp;
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.UntypedActor;
-import akka.actor.UntypedActorFactory;
 
 import java.util.ArrayList;
 
@@ -26,7 +23,7 @@ public class Starter {
 
         sim.addHuman(Human.class, "human-1", house, devices);
 
-        sim.addActor(ExampleActor.class, "slowdown");
+        sim.addActor(SleepActor.class, "slowdown");
         sim.start();
     }
 

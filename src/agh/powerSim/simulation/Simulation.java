@@ -1,9 +1,8 @@
 package agh.powerSim.simulation;
 
 import agh.powerSim.simulation.actors.ClockActor;
-import agh.powerSim.simulation.actors.Human;
-import agh.powerSim.simulation.actors.devices.Device;
-import agh.powerSim.simulation.actors.devices.Lamp;
+import agh.powerSim.simulation.actors.devices.BaseDevice;
+import agh.powerSim.simulation.actors.humans.Human;
 import akka.actor.*;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -11,7 +10,6 @@ import org.joda.time.LocalDateTime;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class Simulation {
@@ -48,11 +46,11 @@ public class Simulation {
         return deviceActor;
     }
 
-    public ActorRef addDevice(final Class<? extends Device> deviceClass, String name, final ActorRef house) {
+    public ActorRef addDevice(final Class<? extends BaseDevice> deviceClass, String name, final ActorRef house) {
         Props props = new Props(new UntypedActorFactory() {
             public UntypedActor create() {
                 try {
-                    Constructor<? extends Device> constructor = deviceClass.getDeclaredConstructor(ActorRef.class);
+                    Constructor<? extends BaseDevice> constructor = deviceClass.getDeclaredConstructor(ActorRef.class);
                     return constructor.newInstance(house);
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(e);

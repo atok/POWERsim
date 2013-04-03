@@ -6,7 +6,7 @@ import akka.event.LoggingAdapter;
 
 import java.util.Random;
 
-public class ExampleActor extends UntypedActor {
+public class SleepActor extends UntypedActor {
 
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 

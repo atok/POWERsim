@@ -1,5 +1,7 @@
-package agh.powerSim.simulation.actors;
+package agh.powerSim.simulation.actors.humans;
 
+import agh.powerSim.simulation.actors.ClockActor;
+import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.devices.Lamp;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
@@ -8,14 +10,14 @@ import akka.event.LoggingAdapter;
 
 import java.util.ArrayList;
 
-public class Human extends UntypedActor {
+public abstract class BaseHuman extends UntypedActor {
 
-    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    protected LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final ActorRef house;
     private final ArrayList<DeviceToken> devices;
 
-    public Human(ActorRef house, ArrayList<DeviceToken> devices) {
+    public BaseHuman(ActorRef house, ArrayList<DeviceToken> devices) {
         this.house = house;
         this.devices = devices;
     }
@@ -31,33 +33,26 @@ public class Human extends UntypedActor {
     public void onReceive(Object message) throws Exception {
         if(message instanceof ClockActor.TimeSignal) {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
-            reactToTime(t);
-            // All time consuming work should be done here.
+            onTime(t);
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
         } else if (message instanceof House.StateReport) {
-            // ...not here.
             House.StateReport report = (House.StateReport)message;
-            reactToHouseState(report);
+            onHouseState(report);
         } else {
             unhandled(message);
         }
     }
 
-    private void reactToTime(ClockActor.TimeSignal timeSignal) {
-        //TODO
+    protected ActorRef getHouse() {
+        return house;
     }
 
-    private void reactToHouseState(House.StateReport report) {
-        if (report.light < 50) {
-            log.warning("TO DARK!");
-            for(DeviceToken device : devices) {
-                if(device.is(Lamp.class)) {
-                    log.warning("turning lamp ON");
-                    device.actor.tell(new Lamp.OnOffSignal(true));
-                }
-            }
-        }
+    protected ArrayList<DeviceToken> getDevices() {
+        return devices;
     }
+
+    protected abstract void onTime(ClockActor.TimeSignal timeSignal);
+    protected abstract void onHouseState(House.StateReport report);
 
     public static class DeviceToken {
         public final Class<?> type;
