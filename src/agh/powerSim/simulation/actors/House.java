@@ -1,5 +1,6 @@
 package agh.powerSim.simulation.actors;
 
+import agh.powerSim.simulation.actors.utils.DataRecorder;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
@@ -28,8 +29,7 @@ public class House extends UntypedActor {
         if(message instanceof ClockActor.TimeSignal) {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
 
-            log.error("Power usage: " + powerUsedInThisStep);
-            log.error("Light provided: " + lightProvidedInThisStep);
+            getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t, getSelf()));
 
             for(ActorRef human : humans) {
                 human.tell(new StateReport(lightProvidedInThisStep));

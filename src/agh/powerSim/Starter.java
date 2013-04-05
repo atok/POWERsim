@@ -15,7 +15,7 @@ public class Starter {
     public static void main(String [] args) {
         Simulation sim = new Simulation();
 
-        final ActorRef house = sim.addActor(House.class, "house-1");
+        final ActorRef house = sim.addHouse(House.class, "house-1");
         final ActorRef lamp =  sim.addDevice(Lamp.class, "lamp-1", house);
 
         final ArrayList<Human.DeviceToken> devices = new ArrayList<Human.DeviceToken>();
