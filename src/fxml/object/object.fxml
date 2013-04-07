@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import java.lang.String?>
+<?import javafx.scene.image.Image?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60" prefWidth="60" xmlns:fx="http://javafx.com/fxml"
+	fx:controller="agh.powerSim.gui.object.ObjectView">
+	<styleClass>
+		<String fx:value="object-box" />
+		<!-- <String fx:value="test"/> -->
+	</styleClass>
+	<children>
+		<AnchorPane id="anchorPane2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<styleClass>
+				<!-- <String fx:value="test" /> -->
+			</styleClass>
+			<children>
+				<ImageView fx:id="image" fitWidth="30.0" fitHeight="30.0" layoutX="5.0" layoutY="5.0">
+				</ImageView>
+			</children>
+		</AnchorPane>
+	</children>
+	<stylesheets>
+		<URL value="@style.css" />
+	</stylesheets>
+</AnchorPane>
