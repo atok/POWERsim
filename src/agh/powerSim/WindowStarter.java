@@ -8,7 +8,7 @@ import agh.powerSim.simulation.Simulation;
 import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.SleepActor;
 import agh.powerSim.simulation.actors.devices.Lamp;
-import agh.powerSim.simulation.actors.devices.LampView;
+import agh.powerSim.gui.LampView;
 import agh.powerSim.simulation.actors.humans.Human;
 import akka.actor.ActorRef;
 

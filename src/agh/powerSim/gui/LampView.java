@@ -1,5 +1,6 @@
-package agh.powerSim.simulation.actors.devices;
+package agh.powerSim.gui;
 
+import agh.powerSim.simulation.actors.devices.Lamp;
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
 import agh.powerSim.gui.Context;

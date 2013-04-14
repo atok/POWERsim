@@ -9,11 +9,13 @@ import java.util.Random;
 public class SleepActor extends UntypedActor {
 
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    private final int timeToSleep = 1000;
 
     @Override
     public void preStart() {
         super.preStart();
         getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(), getSelf());
+        log.warning("SleepActor ENABLED (t = " + timeToSleep + " ms)");
     }
 
     @Override
@@ -28,10 +30,7 @@ public class SleepActor extends UntypedActor {
             // #  Be a good citizen and don't exhaust the thread pool  #
             // #  PS. for time dependent things use TimeSignals        #
             // #########################################################
-            int timeToSleep = 2000; // + (new Random()).nextInt(3000);
-            log.warning("Sleeping: " + timeToSleep);
             Thread.sleep(timeToSleep);
-
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
         } else {
             unhandled(message);
