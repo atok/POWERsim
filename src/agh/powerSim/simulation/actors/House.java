@@ -16,11 +16,12 @@ public class House extends UntypedActor {
 
     double powerUsedInThisStep = 0;
     double lightProvidedInThisStep = 0;
+    double heatProvidedInThisStep = 0;
 
     @Override
     public void preStart() {
         super.preStart();
-        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(), getSelf());
+        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), House.class), getSelf());
         log.error("house started");
     }
 
@@ -37,6 +38,7 @@ public class House extends UntypedActor {
 
             powerUsedInThisStep = 0;
             lightProvidedInThisStep = 0;
+            heatProvidedInThisStep = 0;
 
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
 
@@ -46,6 +48,9 @@ public class House extends UntypedActor {
         } else if (message instanceof LightSignal) {
             LightSignal lightSignal = (LightSignal)message;
             lightProvidedInThisStep += lightSignal.light;
+        } else if(message instanceof HeatSignal) {
+            HeatSignal heatSignal = (HeatSignal)message;
+            heatProvidedInThisStep += heatSignal.heat;
         } else if (message instanceof RegisterForState) {
             humans.add(getSender());
         } else {
@@ -54,7 +59,7 @@ public class House extends UntypedActor {
     }
 
     public static class StateReport {
-        public final double light;
+        public final double light;          // lx
         public StateReport(double light) {
             this.light = light;
         }
@@ -73,6 +78,13 @@ public class House extends UntypedActor {
         public final double light;
         public LightSignal(double light) {
             this.light = light;
+        }
+    }
+
+    public static class HeatSignal {
+        public final double heat;
+        public HeatSignal(double heat) {
+            this.heat = heat;
         }
     }
 }

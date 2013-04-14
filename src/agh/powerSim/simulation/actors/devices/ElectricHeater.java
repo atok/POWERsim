@@ -4,13 +4,13 @@ import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
 import akka.actor.ActorRef;
 
-public class Lamp extends BaseDevice {
+public class ElectricHeater extends BaseDevice {
 
-    private final double powerUsage = 10;
-    private final double lightGen = 10;
+    private final double powerUsage = 100;
+    private final double heatGen = 10;
     private boolean isOn = false;
 
-    public Lamp(ActorRef house) {
+    public ElectricHeater(ActorRef house) {
         super(house);
     }
 
@@ -30,8 +30,8 @@ public class Lamp extends BaseDevice {
             double power = powerUsage * t.timeDelta;
             getHouse().tell(new House.PowerUsageSignal(power));
 
-            double light = lightGen * t.timeDelta;
-            getHouse().tell(new House.LightSignal(light));
+            double heat = heatGen * t.timeDelta;
+            getHouse().tell(new House.HeatSignal(heat));
         }
     }
 
@@ -47,6 +47,5 @@ public class Lamp extends BaseDevice {
             this.state = state;
         }
     }
-
 
 }

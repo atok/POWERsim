@@ -9,6 +9,11 @@ import java.util.ArrayList;
 
 public class Human extends BaseHuman {
 
+    public static enum State {Sleeping, Awake};
+    private State state = State.Awake;
+
+    ClockActor.TimeSignal currentTime;
+
     public Human(ActorRef house, ArrayList<DeviceToken> devices) {
         super(house, devices);
     }
@@ -24,19 +29,33 @@ public class Human extends BaseHuman {
 
     @Override
     protected void onTime(ClockActor.TimeSignal timeSignal) {
-        //TODO
+        currentTime = timeSignal;
+        requestDevicesStateUpdate();
     }
 
     @Override
     protected void onHouseState(House.StateReport report) {
-        if (report.light < 50) {
-            log.warning("TO DARK!");
-            for(DeviceToken device : getDevices()) {
-                if(device.is(Lamp.class)) {
-                    log.warning("turning lamp ON");
-                    device.actor.tell(new Lamp.OnOffSignal(true));
-                }
+        lightActions(report.light);
+    }
+
+    private void requestMoreLight() {
+        for(DeviceTokenWithState device : getDevices()) {
+            if(device.is(Lamp.class) && device.state.isOn == false && device.stateChangeRequested == false) {
+                device.actor.tell(new Lamp.OnOffSignal(true));
+                break;
             }
+        }
+    }
+
+    private void lightActions(double lightLevel) {
+        log.warning("lightLevel " + lightLevel);
+        if(state == State.Awake) {
+            if(lightLevel < 300) {
+                log.warning("More light!!!");
+                requestMoreLight();
+            }
+        } else if(state == State.Sleeping) {
+
         }
     }
 

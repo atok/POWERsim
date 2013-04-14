@@ -22,7 +22,7 @@ public abstract class BaseDevice extends UntypedActor {
     @Override
     public void preStart() {
         super.preStart();
-        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(), getSelf());
+        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), BaseDevice.class), getSelf());
     }
 
     @Override
@@ -31,11 +31,29 @@ public abstract class BaseDevice extends UntypedActor {
             ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
             onTime(t);
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
+        } else if (message instanceof StateInfoRequest) {
+            getSender().tell(getState(), getSelf());
         } else {
             unhandled(message);
         }
     }
 
     protected abstract void onTime(ClockActor.TimeSignal t);
+    public abstract DeviceState getState();
+
+    public static final class DeviceState {
+        public final boolean isOn;
+        public final double momentaryPowerDraw;
+        public final String stateTitle;
+        public final String stateDescription;
+        public DeviceState(boolean on, double momentaryPowerDraw, String stateTitle, String stateDescription) {
+            isOn = on;
+            this.momentaryPowerDraw = momentaryPowerDraw;
+            this.stateTitle = stateTitle;
+            this.stateDescription = stateDescription;
+        }
+    }
+
+    public static final class StateInfoRequest {}
 
 }

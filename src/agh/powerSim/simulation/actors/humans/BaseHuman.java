@@ -2,6 +2,7 @@ package agh.powerSim.simulation.actors.humans;
 
 import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
+import agh.powerSim.simulation.actors.devices.BaseDevice;
 import agh.powerSim.simulation.actors.devices.Lamp;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
@@ -15,17 +16,21 @@ public abstract class BaseHuman extends UntypedActor {
     protected LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final ActorRef house;
-    private final ArrayList<DeviceToken> devices;
+    private final ArrayList<DeviceTokenWithState> devices;
 
     public BaseHuman(ActorRef house, ArrayList<DeviceToken> devices) {
         this.house = house;
-        this.devices = devices;
+
+        this.devices = new ArrayList<DeviceTokenWithState>();
+        for(DeviceToken dt : devices) {
+            this.devices.add(new DeviceTokenWithState(dt));
+        }
     }
 
     @Override
     public void preStart() {
         super.preStart();
-        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(), getSelf());
+        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), BaseHuman.class), getSelf());
         house.tell(new House.RegisterForState(), getSelf());
     }
 
@@ -38,8 +43,26 @@ public abstract class BaseHuman extends UntypedActor {
         } else if (message instanceof House.StateReport) {
             House.StateReport report = (House.StateReport)message;
             onHouseState(report);
+        } else if (message instanceof BaseDevice.DeviceState) {
+            updateDeviceState((BaseDevice.DeviceState)message, getSender());
         } else {
             unhandled(message);
+        }
+    }
+
+    private void updateDeviceState(BaseDevice.DeviceState newState, ActorRef actor) {
+        for(DeviceTokenWithState device : devices) {
+            if(device.actor.equals(actor)) {
+                device.state = newState;
+                device.stateChangeRequested = false;
+                break;
+            }
+        }
+    }
+
+    protected void requestDevicesStateUpdate() {
+        for(DeviceToken device : getDevices()) {
+            device.actor.tell(new BaseDevice.StateInfoRequest(), getSelf());
         }
     }
 
@@ -47,12 +70,21 @@ public abstract class BaseHuman extends UntypedActor {
         return house;
     }
 
-    protected ArrayList<DeviceToken> getDevices() {
+    protected ArrayList<DeviceTokenWithState> getDevices() {
         return devices;
     }
 
     protected abstract void onTime(ClockActor.TimeSignal timeSignal);
     protected abstract void onHouseState(House.StateReport report);
+
+    public static class DeviceTokenWithState extends DeviceToken {
+        public BaseDevice.DeviceState state = new BaseDevice.DeviceState(false, 0, "", "");
+        public boolean stateChangeRequested = false;
+
+        public DeviceTokenWithState(DeviceToken token) {
+            super(token.type, token.actor);
+        }
+    }
 
     public static class DeviceToken {
         public final Class<?> type;
