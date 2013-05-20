@@ -5,6 +5,7 @@ import agh.powerSim.simulation.actors.DataRecorderActor;
 import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.devices.BaseDevice;
 import agh.powerSim.simulation.actors.humans.Human;
+import agh.powerSim.simulation.actors.humans.HumanCharacter;
 import akka.actor.*;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -30,11 +31,15 @@ public class Simulation {
     }
 
     public ActorRef addHuman(final Class<? extends Human> humanClass, String name, final ActorRef house, final ArrayList<Human.DeviceToken> devices) {
+        return addHuman(humanClass, name, house, devices, new HumanCharacter());
+    }
+
+    public ActorRef addHuman(final Class<? extends Human> humanClass, String name, final ActorRef house, final ArrayList<Human.DeviceToken> devices, final HumanCharacter humanCharacter) {
         Props props = new Props(new UntypedActorFactory() {
             public UntypedActor create() {
                 try {
-                    Constructor<? extends Human> constructor = humanClass.getDeclaredConstructor(ActorRef.class, ArrayList.class);
-                    return constructor.newInstance(house, devices);
+                    Constructor<? extends Human> constructor = humanClass.getDeclaredConstructor(ActorRef.class, ArrayList.class, HumanCharacter.class);
+                    return constructor.newInstance(house, devices, humanCharacter);
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 } catch (InvocationTargetException e) {

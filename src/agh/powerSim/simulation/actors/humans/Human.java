@@ -13,15 +13,11 @@ public class Human extends BaseHuman {
     public static enum State {Sleeping, Awake};
     private State state = State.Awake;
 
-    //characteristics
-    int darknessTreshold = 300;
-    int entertainment;
-    int hunger;
-    int workDuty;
-    int cleaner;
-    int coldTreshold;
-
     ClockActor.TimeSignal currentTime;
+
+    public Human(ActorRef house, ArrayList<DeviceToken> devices, HumanCharacter humanCharacter) {
+        super(house, devices, humanCharacter);
+    }
 
     public Human(ActorRef house, ArrayList<DeviceToken> devices) {
         super(house, devices);
@@ -45,6 +41,10 @@ public class Human extends BaseHuman {
     @Override
     protected void onHouseState(House.StateReport report) {
         lightActions(report.light);
+        radiatorActions(report.temperature);
+    }
+
+    private void radiatorActions(double temperature) {
     }
 
     private void requestMoreLight() {
@@ -60,7 +60,7 @@ public class Human extends BaseHuman {
     private void lightActions(double lightLevel) {
         log.warning("lightLevel " + lightLevel);
         if(state == State.Awake) {
-            if(lightLevel < darknessTreshold) {
+            if(lightLevel < humanCharacter.lightComfortTreshold) {
                 log.warning("More light!!!");
                 requestMoreLight();
             }
@@ -69,53 +69,14 @@ public class Human extends BaseHuman {
         }
     }
 
-    public int getDarknessTreshold() {
-        return darknessTreshold;
+    public int getLightComfortTreshold() {
+        return humanCharacter.lightComfortTreshold;
     }
 
-    public void setDarknessTreshold(int darknessTreshold) {
-        this.darknessTreshold = darknessTreshold;
-    }
-
-    public int getEntertainment() {
-        return entertainment;
-    }
-
-    public void setEntertainment(int entertainment) {
-        this.entertainment = entertainment;
-    }
-
-    public int getHunger() {
-        return hunger;
-    }
-
-    public void setHunger(int hunger) {
-        this.hunger = hunger;
-    }
-
-    public int getWorkDuty() {
-        return workDuty;
-    }
-
-    public void setWorkDuty(int workDuty) {
-        this.workDuty = workDuty;
-    }
-
-    public int getCleaner() {
-        return cleaner;
-    }
-
-    public void setCleaner(int cleaner) {
-        this.cleaner = cleaner;
-    }
-
-    public int getColdTreshold() {
-        return coldTreshold;
-    }
-
-    public void setColdTreshold(int coldTreshold) {
-        this.coldTreshold = coldTreshold;
+    public void setLightComfortTreshold(int lightComfortTreshold) {
+        this.humanCharacter.lightComfortTreshold = lightComfortTreshold;
     }
 
     public static class SomeCustomEvent {}
+
 }

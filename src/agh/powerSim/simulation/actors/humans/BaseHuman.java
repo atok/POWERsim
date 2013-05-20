@@ -22,6 +22,8 @@ public abstract class BaseHuman extends UntypedActor {
     private final ActorRef house;
     private final ArrayList<DeviceTokenWithState> devices;
 
+    protected HumanCharacter humanCharacter;
+
     public BaseHuman(ActorRef house, ArrayList<DeviceToken> devices) {
         this.house = house;
 
@@ -29,6 +31,11 @@ public abstract class BaseHuman extends UntypedActor {
         for(DeviceToken dt : devices) {
             this.devices.add(new DeviceTokenWithState(dt));
         }
+    }
+
+    public BaseHuman(ActorRef house, ArrayList<DeviceToken> devices, HumanCharacter humanCharacter) {
+        this(house, devices);
+        this.humanCharacter = humanCharacter;
     }
 
     @Override

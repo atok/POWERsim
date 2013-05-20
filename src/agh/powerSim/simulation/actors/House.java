@@ -33,7 +33,7 @@ public class House extends UntypedActor {
             getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t, getSelf()));
 
             for(ActorRef human : humans) {
-                human.tell(new StateReport(lightProvidedInThisStep));
+                human.tell(new StateReport(lightProvidedInThisStep, heatProvidedInThisStep));
             }
 
             powerUsedInThisStep = 0;
@@ -60,8 +60,10 @@ public class House extends UntypedActor {
 
     public static class StateReport {
         public final double light;          // lx
-        public StateReport(double light) {
+        public final double temperature;
+        public StateReport(double light, double temperature) {
             this.light = light;
+            this.temperature = temperature;
         }
     }
 
