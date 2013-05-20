@@ -2,6 +2,7 @@ package agh.powerSim.simulation.actors.humans;
 
 import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
+import agh.powerSim.simulation.actors.devices.DeviceType;
 import agh.powerSim.simulation.actors.devices.Lamp;
 import akka.actor.ActorRef;
 
@@ -48,7 +49,8 @@ public class Human extends BaseHuman {
 
     private void requestMoreLight() {
         for(DeviceTokenWithState device : getDevices()) {
-            if(device.is(Lamp.class) && device.state.isOn == false && device.stateChangeRequested == false) {
+            log.debug("Device types: " + device.getTypesOfDevice());
+            if(device.is(DeviceType.LAMP) && device.state.isOn == false && device.stateChangeRequested == false) {
                 device.actor.tell(new Lamp.OnOffSignal(true));
                 break;
             }

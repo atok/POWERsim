@@ -4,6 +4,9 @@ import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
 import akka.actor.ActorRef;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ElectricHeater extends BaseDevice {
 
     private final double powerUsage = 100;
@@ -12,6 +15,12 @@ public class ElectricHeater extends BaseDevice {
 
     public ElectricHeater(ActorRef house) {
         super(house);
+    }
+
+    public static List<DeviceType> getDeviceTypes() {
+        ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
+        deviceTypes.add(DeviceType.LAMP);
+        return deviceTypes;
     }
 
     @Override
@@ -37,7 +46,7 @@ public class ElectricHeater extends BaseDevice {
 
     @Override
     public DeviceState getState() {
-        return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON": "OFF", isOn ? "Device is ON": "Device is OFF");
+        return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON": "OFF", isOn ? "Device is ON": "Device is OFF", getDeviceTypes());
     }
 
     public static class OnOffSignal {

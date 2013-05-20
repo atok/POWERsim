@@ -6,13 +6,23 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class BaseDevice extends UntypedActor {
 
     protected LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final ActorRef house;
+
     public BaseDevice( ActorRef house) {
         this.house = house;
+    }
+
+//    public abstract List<DeviceType> getDeviceTypes();
+    public static List<DeviceType> getDeviceTypes() {
+        ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
+        return deviceTypes;
     }
 
     protected ActorRef getHouse() {
@@ -46,11 +56,13 @@ public abstract class BaseDevice extends UntypedActor {
         public final double momentaryPowerDraw;
         public final String stateTitle;
         public final String stateDescription;
-        public DeviceState(boolean on, double momentaryPowerDraw, String stateTitle, String stateDescription) {
+        public final List<DeviceType> deviceTypes;
+        public DeviceState(boolean on, double momentaryPowerDraw, String stateTitle, String stateDescription, List<DeviceType> deviceTypes) {
             isOn = on;
             this.momentaryPowerDraw = momentaryPowerDraw;
             this.stateTitle = stateTitle;
             this.stateDescription = stateDescription;
+            this.deviceTypes = deviceTypes;
         }
     }
 
