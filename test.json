@@ -1,0 +1,24 @@
+{
+"houses": [
+	{
+		"id": "house-1",
+		"humans": [
+			{
+				"id": "Jan-Kowalski",
+				"lightComfortTreshold": 300,
+				"entertainment": 1,
+				"hunger": 1,
+				"workDuty": 1,
+				"cleaner": 1,
+				"warmComfortTreshold": 16.0
+			}
+		],
+		"devices": [
+			{
+				"id": "lampa-1",
+				"class": "agh.powerSim.simulation.actors.devices.Lamp"
+			}
+		]
+	}
+]
+}
