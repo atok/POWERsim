@@ -1,92 +1,154 @@
 package agh.powerSim.simulation.actors;
 
+import java.util.HashMap;
+
+import agh.powerSim.simulation.actors.humans.Human;
+import agh.powerSim.simulation.actors.humans.HumanState;
+import agh.powerSim.simulation.actors.humans.HumanStateChanger;
+import agh.powerSim.simulation.actors.humans.HumanStateChanger.StateAndTime;
 import agh.powerSim.simulation.actors.utils.DataRecorder;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import java.util.TreeSet;
-
 public class House extends UntypedActor {
 
-    TreeSet<ActorRef> humans = new TreeSet<ActorRef>();
+	HashMap<ActorRef, HumanStateChanger.StateAndTime> humans = new HashMap<>();
 
-    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+	LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-    double powerUsedInThisStep = 0;
-    double lightProvidedInThisStep = 0;
-    double heatProvidedInThisStep = 0;
+	double powerUsedInThisStep = 0;
+	double lightProvidedInThisStep = 0;
+	double heatProvidedInThisStep = 0;
 
-    @Override
-    public void preStart() {
-        super.preStart();
-        getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), House.class), getSelf());
-        log.error("house started");
-    }
+	double houseIsolation = 0.5;
 
-    @Override
-    public void onReceive(Object message) throws Exception {
-        if(message instanceof ClockActor.TimeSignal) {
-            ClockActor.TimeSignal t = (ClockActor.TimeSignal)message;
+	@Override
+	public void preStart() {
+		super.preStart();
+		getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), House.class), getSelf());
+		log.error("house started");
+	}
 
-            getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t, getSelf()));
+	@Override
+	public void onReceive(Object message) throws Exception {
+		if (message instanceof ClockActor.TimeSignal) {
+			ClockActor.TimeSignal t = (ClockActor.TimeSignal) message;
 
-            for(ActorRef human : humans) {
-                human.tell(new StateReport(lightProvidedInThisStep, heatProvidedInThisStep));
-            }
+			getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t, getSelf()), getSelf());
 
-            powerUsedInThisStep = 0;
-            lightProvidedInThisStep = 0;
-            heatProvidedInThisStep = 0;
+			ActorRef last = findLastHuman();
+			for (ActorRef human : humans.keySet()) {
+				boolean lastNotBussyHuman = false;
+				if (last.equals(human)) {
+					lastNotBussyHuman = true;
+				}
+				human.tell(new StateReport(lightProvidedInThisStep, heatProvidedInThisStep, t.deltaTime, humans, lastNotBussyHuman), getSelf());
+			}
 
-            getSender().tell(new ClockActor.DoneSignal(), getSelf());
+			powerUsedInThisStep = 0;
+			lightProvidedInThisStep = 0;
+			heatProvidedInThisStep = 0;
 
-        } else if (message instanceof PowerUsageSignal) {
-            PowerUsageSignal powerSignal = (PowerUsageSignal)message;
-            powerUsedInThisStep += powerSignal.powerUsed;
-        } else if (message instanceof LightSignal) {
-            LightSignal lightSignal = (LightSignal)message;
-            lightProvidedInThisStep += lightSignal.light;
-        } else if(message instanceof HeatSignal) {
-            HeatSignal heatSignal = (HeatSignal)message;
-            heatProvidedInThisStep += heatSignal.heat;
-        } else if (message instanceof RegisterForState) {
-            humans.add(getSender());
-        } else {
-            unhandled(message);
-        }
-    }
+			getSender().tell(new ClockActor.DoneSignal(), getSelf());
 
-    public static class StateReport {
-        public final double light;          // lx
-        public final double temperature;
-        public StateReport(double light, double temperature) {
-            this.light = light;
-            this.temperature = temperature;
-        }
-    }
+		} else if (message instanceof PowerUsageSignal) {
+			PowerUsageSignal powerSignal = (PowerUsageSignal) message;
+			powerUsedInThisStep += powerSignal.powerUsed;
+		} else if (message instanceof LightSignal) {
+			LightSignal lightSignal = (LightSignal) message;
+			lightProvidedInThisStep += lightSignal.light;
+			// log.warning("LIGHT: "+lightProvidedInThisStep);
+		} else if (message instanceof HeatSignal) {
+			HeatSignal heatSignal = (HeatSignal) message;
+			if (heatSignal.weather) {
+				heatProvidedInThisStep += heatSignal.heat * (1 - houseIsolation);
+			} else {
+				heatProvidedInThisStep += heatSignal.heat;
+			}
+			// log.warning("HEAT: "+heatProvidedInThisStep);
+		} else if (message instanceof RegisterForState) {
+			humans.put(getSender(), new HumanStateChanger.StateAndTime(null, null));
+		} else if (message instanceof Human.HumanStateNotice) {
+			Human.HumanStateNotice msg = (Human.HumanStateNotice) message;
+			humans.put(msg.sender, msg.stateAndTime);
+		} else {
+			unhandled(message);
+		}
+	}
 
-    public static class RegisterForState {}
+	private ActorRef findLastHuman() {
+		ActorRef currentLast = null;
+		StateAndTime currentLastStateAndTime = null;
+		for (ActorRef human : humans.keySet()) {
+			if (currentLast == null) {
+				currentLast = human;
+				currentLastStateAndTime = humans.get(human);
+			}
+			StateAndTime stateAndTime = humans.get(human);
+			if (stateAndTime.state == null || stateAndTime.state.equals(HumanState.INSIDE)) {
+				if (stateAndTime.state != null && stateAndTime.state.equals(currentLastStateAndTime.state)) {
+					if (stateAndTime.time.isAfter(currentLastStateAndTime.time)) {
+						currentLast = human;
+						currentLastStateAndTime = stateAndTime;
+					}
+				} else {
+					currentLast = human;
+					currentLastStateAndTime = stateAndTime;
+				}
+			}
+		}
+		return currentLast;
+	}
 
-    public static class PowerUsageSignal {
-        public final double powerUsed;
-        public PowerUsageSignal(double powerUsed) {
-            this.powerUsed = powerUsed;
-        }
-    }
+	public static class StateReport {
+		public final double light; // lx
+		public final double temperature;
+		public final double deltaTime;
+		public final HashMap<ActorRef, HumanStateChanger.StateAndTime> housemates;
+		public final boolean last;
 
-    public static class LightSignal {
-        public final double light;
-        public LightSignal(double light) {
-            this.light = light;
-        }
-    }
+		public StateReport(double light, double temperature, double deltaTime, HashMap<ActorRef, HumanStateChanger.StateAndTime> housemates, boolean last) {
+			this.light = light;
+			this.temperature = temperature;
+			this.deltaTime = deltaTime;
+			this.housemates = housemates;
+			this.last = last;
+		}
+	}
 
-    public static class HeatSignal {
-        public final double heat;
-        public HeatSignal(double heat) {
-            this.heat = heat;
-        }
-    }
+	public static class RegisterForState {
+	}
+
+	public static class PowerUsageSignal {
+		public final double powerUsed;
+
+		public PowerUsageSignal(double powerUsed) {
+			this.powerUsed = powerUsed;
+		}
+	}
+
+	public static class LightSignal {
+		public final double light;
+
+		public LightSignal(double light) {
+			this.light = light;
+		}
+	}
+
+	public static class HeatSignal {
+		public final double heat;
+		public final boolean weather;
+
+		public HeatSignal(double heat) {
+			this(heat, false);
+		}
+
+		public HeatSignal(double heat, boolean isWeather) {
+			this.heat = heat;
+			this.weather = isWeather;
+
+		}
+	}
 }

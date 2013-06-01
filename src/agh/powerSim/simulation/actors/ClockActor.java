@@ -11,6 +11,7 @@ import org.joda.time.LocalDateTime;
 import scala.util.regexp.Base;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ public class ClockActor extends UntypedActor {
 
     LocalDateTime now = null;
     int timeDelta = 0; //seconds
+    
 
     public static enum TurnType {houses, devices, humans, others};
     private TurnType turn = null;
@@ -71,6 +73,10 @@ public class ClockActor extends UntypedActor {
     }
 
     private void sendTimeSignal() {
+    	
+    	if(now.isAfter(LocalDateTime.fromDateFields(new Date(1000*60*60*200)))){
+    		System.exit(0);
+    	}
 
         if(turn == null) {
             turn = TurnType.houses;
@@ -176,18 +182,18 @@ public class ClockActor extends UntypedActor {
     }
 
     public static class TimeSignal implements Serializable {
-        public final double timeDelta; //seconds
+        public final double deltaTime; //seconds
         public final LocalDateTime time;
         /**
          * @param timeDelta time step length in seconds
          * @param time actual calendar time
          */
         public TimeSignal(double timeDelta, LocalDateTime time) {
-            this.timeDelta = timeDelta;
+            this.deltaTime = timeDelta;
             this.time = time;
         }
         public String toString() {
-            return time.toString() + " (d=" + timeDelta + ")";
+            return time.toString() + " (d=" + deltaTime + ")";
         }
     }
 

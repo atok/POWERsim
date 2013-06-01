@@ -9,10 +9,11 @@ package agh.powerSim.simulation.actors.devices;
  *
  */
 public enum DeviceType {
-    LAMP,
+    LIGHT,
     ENTERTAINMENT,
     MEAL,
     WORK,
     CLEANING,
-    RADIATOR
+    HEATING,
+    COOLING
 }

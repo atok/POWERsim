@@ -9,7 +9,7 @@ import java.util.Random;
 public class SleepActor extends UntypedActor {
 
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-    private final int timeToSleep = 1000;
+    private final int timeToSleep = 0;
 
     @Override
     public void preStart() {

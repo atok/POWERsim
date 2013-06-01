@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ElectricHeater extends BaseDevice {
 
-    private final double powerUsage = 100;
+    private final double powerUsage = 1000;
     private final double heatGen = 10;
     private boolean isOn = false;
 
@@ -19,7 +19,7 @@ public class ElectricHeater extends BaseDevice {
 
     public static List<DeviceType> getDeviceTypes() {
         ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
-        deviceTypes.add(DeviceType.LAMP);
+        deviceTypes.add(DeviceType.HEATING);
         return deviceTypes;
     }
 
@@ -28,7 +28,7 @@ public class ElectricHeater extends BaseDevice {
         if(message instanceof OnOffSignal) {
             OnOffSignal m = (OnOffSignal)message;
             isOn = m.state;
-            log.warning("state := " + isOn);
+            //log.warning("state := " + isOn);
         } else {
             super.onReceive(message);
         }
@@ -36,11 +36,11 @@ public class ElectricHeater extends BaseDevice {
 
     protected void onTime(ClockActor.TimeSignal t) {
         if(isOn) {
-            double power = powerUsage * t.timeDelta;
-            getHouse().tell(new House.PowerUsageSignal(power));
+            double power = powerUsage * t.deltaTime;
+            getHouse().tell(new House.PowerUsageSignal(power), getSelf());
 
-            double heat = heatGen * t.timeDelta;
-            getHouse().tell(new House.HeatSignal(heat));
+            double heat = heatGen * t.deltaTime;
+            getHouse().tell(new House.HeatSignal(heat), getSelf());
         }
     }
 

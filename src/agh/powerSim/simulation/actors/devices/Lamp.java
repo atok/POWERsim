@@ -7,7 +7,7 @@ import akka.actor.ActorRef;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lamp extends BaseDevice {
+public class Lamp extends BaseDevice{
 
     private final double powerUsage = 10;
     private final double lightGen = 10;
@@ -19,7 +19,7 @@ public class Lamp extends BaseDevice {
 
     public static List<DeviceType> getDeviceTypes() {
         ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
-        deviceTypes.add(DeviceType.LAMP);
+        deviceTypes.add(DeviceType.LIGHT);
         return deviceTypes;
     }
 
@@ -28,7 +28,7 @@ public class Lamp extends BaseDevice {
         if(message instanceof OnOffSignal) {
             OnOffSignal m = (OnOffSignal)message;
             isOn = m.state;
-            log.warning("state := " + isOn);
+            //log.warning("state := " + isOn);
         } else {
             super.onReceive(message);
         }
@@ -36,11 +36,13 @@ public class Lamp extends BaseDevice {
 
     protected void onTime(ClockActor.TimeSignal t) {
         if(isOn) {
-            double power = powerUsage * t.timeDelta;
+            double power = powerUsage * t.deltaTime;
             getHouse().tell(new House.PowerUsageSignal(power));
 
-            double light = lightGen * t.timeDelta;
+            double light = lightGen * t.deltaTime;
             getHouse().tell(new House.LightSignal(light));
+            
+            log.warning("Lamp is "+(isOn?"ON":"OFF"));
         }
     }
 
