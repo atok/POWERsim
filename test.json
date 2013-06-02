@@ -10,7 +10,17 @@
 				"hunger": 1,
 				"workDuty": 1,
 				"cleaner": 1,
-				"warmComfortTreshold": 16.0
+				"warmComfortTreshold": 16.0,
+                "states": [
+                    {
+                        "state": "OUTSIDE",
+                        "fromTime": "10:00",
+                        "tillTime": "18:00",
+                        "days": [1,2,3,4,5],
+                        "months": [1,2,3,4,5,6,7,8,9,10,11,12],
+                        "comment": "Bed time, punk!"
+                    }
+                ]
 			}
 		],
 		"devices": [
