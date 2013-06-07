@@ -26,8 +26,20 @@
 		"devices": [
 			{
 				"id": "lampa-1",
-				"class": "agh.powerSim.simulation.actors.devices.Lamp"
-			}
+				"class": "agh.powerSim.simulation.actors.devices.Lamp",
+                "parameters": {
+                    "lightGen": "20",
+                    "powerUsage": "10"
+                }
+			},
+            {
+                "id": "grzejniczek-1",
+                "class": "agh.powerSim.simulation.actors.devices.ElectricHeater",
+                "parameters": {
+                    "heatGen": "20",
+                    "powerUsage": "10"
+                }
+            }
 		]
 	}
 ]

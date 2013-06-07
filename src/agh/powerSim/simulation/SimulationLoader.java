@@ -9,13 +9,10 @@ import org.joda.time.DateTime;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.prefs.Preferences;
 
 /**
@@ -50,6 +47,7 @@ public class SimulationLoader {
     private static final String DAYS = "days";
     private static final String MONTHS = "months";
     private static final String COMMENT = "comment";
+    private static final String PARAMETERS = "parameters";
 
     private static final String STATE_DATE_FORMAT = "HH:mm";
 
@@ -94,9 +92,28 @@ public class SimulationLoader {
             String deviceClassName = device.path(DEVICE_CLASS).asText();
             System.out.println("Creating device " + deviceId + " of class " + deviceClassName);
             Class deviceClass = Class.forName(deviceClassName);
-            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceId, loaderContext.currentHouse);
+
+            Map<String, String> parameters = loadParameters(device);
+
+            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceId, loaderContext.currentHouse, parameters);
             loaderContext.devicesInHouse.add(new Human.DeviceToken(deviceClass, deviceActorRef));
         }
+    }
+
+    private Map<String, String> loadParameters(JsonNode device) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        JsonNode paramsNode = device.path(PARAMETERS);
+        if( !paramsNode.isMissingNode() ) {
+            Iterator<Map.Entry<String, JsonNode>> nodesIt = paramsNode.fields();
+            while(nodesIt.hasNext()) {
+                Map.Entry<String, JsonNode> entry = nodesIt.next();
+                String fieldName = entry.getKey();
+                String fieldValue = entry.getValue().asText();
+                parameters.put(fieldName, fieldValue);
+            }
+        }
+
+        return parameters;
     }
 
     private void createHouse(JsonNode houseNode, Simulation simulation) throws Exception {

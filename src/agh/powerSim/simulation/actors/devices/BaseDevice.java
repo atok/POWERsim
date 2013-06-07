@@ -1,13 +1,17 @@
 package agh.powerSim.simulation.actors.devices;
 
 import agh.powerSim.simulation.actors.ClockActor;
+import agh.powerSim.simulation.actors.utils.ConversionHelper;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseDevice extends UntypedActor {
 
@@ -17,6 +21,16 @@ public abstract class BaseDevice extends UntypedActor {
 
     public BaseDevice( ActorRef house) {
         this.house = house;
+    }
+
+    public void init(Map<String, String> parameters) throws IllegalAccessException, NoSuchFieldException {
+        Set<String> fields = parameters.keySet();
+        for(String fieldName : fields) {
+                Field field = getClass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = ConversionHelper.convert((String) parameters.get(fieldName), field.getType());
+                field.set(this, value);
+        }
     }
 
 //    public abstract List<DeviceType> getDeviceTypes();

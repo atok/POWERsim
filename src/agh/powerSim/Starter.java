@@ -13,19 +13,27 @@ import agh.powerSim.simulation.actors.environment.WeatherActor;
 import akka.actor.ActorRef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.joda.time.DateTime;
+import scala.collection.immutable.Nil;
 
 public class Starter {
 
 	public static void main(String[] args) {
 		Simulation sim = new Simulation();
 
+        Map<String,String> parametersLamp = new HashMap<String, String>();
+        parametersLamp.put("lightGen", "1000.0");
+        Map<String,String> parametersHeater = new HashMap<String, String>();
+
 		final ActorRef house = sim.addHouse(House.class, "house-1");
-		final ActorRef lamp1 = sim.addDevice(Lamp.class, "lamp-1", house);
-		final ActorRef lamp2 = sim.addDevice(Lamp.class, "lamp-2", house);
-		final ActorRef lamp3 = sim.addDevice(Lamp.class, "lamp-3", house);
-		final ActorRef heater = sim.addDevice(ElectricHeater.class, "heater-1", house);
+		final ActorRef lamp1 = sim.addDevice(Lamp.class, "lamp-1", house, parametersLamp);
+		final ActorRef lamp2 = sim.addDevice(Lamp.class, "lamp-2", house, parametersLamp);
+		final ActorRef lamp3 = sim.addDevice(Lamp.class, "lamp-3", house, parametersLamp);
+		final ActorRef heater = sim.addDevice(ElectricHeater.class, "heater-1", house, parametersHeater);
 
 		final ArrayList<Human.DeviceToken> devices = new ArrayList<Human.DeviceToken>();
 		devices.add(new Human.DeviceToken(Lamp.class, lamp1));
