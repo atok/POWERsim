@@ -1,5 +1,6 @@
 package agh.powerSim.simulation.actors;
 
+import agh.powerSim.gui.Context;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -9,13 +10,12 @@ import java.util.Random;
 public class SleepActor extends UntypedActor {
 
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-    private final int timeToSleep = 0;
 
     @Override
     public void preStart() {
         super.preStart();
         getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), SleepActor.class), getSelf());
-        log.warning("SleepActor ENABLED (t = " + timeToSleep + " ms)");
+        log.warning("SleepActor ENABLED (t = " + getTimeToSleep() + " ms)");
     }
 
     @Override
@@ -30,10 +30,14 @@ public class SleepActor extends UntypedActor {
             // #  Be a good citizen and don't exhaust the thread pool  #
             // #  PS. for time dependent things use TimeSignals        #
             // #########################################################
-            Thread.sleep(timeToSleep);
+            Thread.sleep(getTimeToSleep());
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
         } else {
             unhandled(message);
         }
     }
+
+	public int getTimeToSleep() {
+		return Context.delay;
+	}
 }

@@ -1,5 +1,6 @@
 package agh.powerSim.simulation.actors;
 
+import agh.powerSim.gui.Context;
 import agh.powerSim.simulation.actors.devices.BaseDevice;
 import agh.powerSim.simulation.actors.humans.BaseHuman;
 import akka.actor.ActorRef;
@@ -74,8 +75,12 @@ public class ClockActor extends UntypedActor {
 
     private void sendTimeSignal() {
     	
-    	if(now.isAfter(LocalDateTime.fromDateFields(new Date(1000*60*60*200)))){
-    		System.exit(0);
+    	if(now.isAfter(LocalDateTime.fromDateFields(new Date(1000*60*60*24*Context.duration)))){
+    		for(ActorRef ref: registeredActors.keySet()){
+    			context().stop(ref);
+    			Context.enable();
+    		}
+    		context().stop(getSelf());
     	}
 
         if(turn == null) {
@@ -89,6 +94,7 @@ public class ClockActor extends UntypedActor {
         } else if (turn == TurnType.others) {
             turn = TurnType.houses;
             now = now.plusSeconds(timeDelta);
+            Context.setTime(now.toString());
             log.warning("Moving time to " + now);
         }
 

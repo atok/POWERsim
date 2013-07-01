@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
 
+import agh.powerSim.gui.Context;
 import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.devices.BaseDevice;
@@ -36,6 +37,8 @@ public class WeatherActor extends UntypedActor {
     public WeatherElement<Double> temperature;
     
     public WeatherElement<Boolean> front;
+    
+    private int viewUpdate = 0;
     
     @Override
     public void preStart() {
@@ -68,6 +71,8 @@ public class WeatherActor extends UntypedActor {
             	house.tell(new House.LightSignal(lightProvided), getSelf());
             	house.tell(new House.HeatSignal(heatProvided,true), getSelf());
             }
+            Context.setWeather((sun.getValue()>80.0?"SUN UP":"SUN DOWN"), temperature.getValue() + " C", clouds.getValue()+ "%");     
+            
             getSender().tell(new ClockActor.DoneSignal(), getSelf());
         } else {
             unhandled(message);
