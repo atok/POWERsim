@@ -14,6 +14,7 @@ import agh.powerSim.gui.Context;
 import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.devices.BaseDevice;
+import agh.powerSim.simulation.actors.utils.DataRecorder;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
@@ -37,6 +38,8 @@ public class WeatherActor extends UntypedActor {
     public WeatherElement<Double> temperature;
     
     public WeatherElement<Boolean> front;
+    
+    public static boolean logOn = true;
     
     private int viewUpdate = 0;
     
@@ -64,6 +67,9 @@ public class WeatherActor extends UntypedActor {
             front.processTime(t.time, t.deltaTime);
             clouds.processTime(t.time, t.deltaTime);
             temperature.processTime(t.time,t.deltaTime);
+            if(logOn){
+            	getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("Wheather status: SUN="+sun.getValue()+"; CLOUDS="+clouds.getValue()+"; TEMP="+temperature.getValue(), t.time, getSelf()), getSelf());
+            }
             double lightProvided = 10 * (50.0 * sun.getValue() + 50.0 * (sun.getValue() * clouds.getValue())/(sun.getValue() + clouds.getValue() + 1.0))/100.0 * t.deltaTime;
             double heatProvided = temperature.getValue() * t.deltaTime;
             //log.warning(temperature.getForecast());

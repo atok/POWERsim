@@ -2,6 +2,8 @@ package agh.powerSim.simulation.actors;
 
 import java.util.HashMap;
 
+import org.joda.time.LocalDateTime;
+
 import agh.powerSim.simulation.actors.humans.Human;
 import agh.powerSim.simulation.actors.humans.HumanState;
 import agh.powerSim.simulation.actors.humans.HumanStateChanger;
@@ -36,7 +38,7 @@ public class House extends UntypedActor {
 		if (message instanceof ClockActor.TimeSignal) {
 			ClockActor.TimeSignal t = (ClockActor.TimeSignal) message;
 
-			getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t, getSelf()), getSelf());
+			getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t.time, getSelf()), getSelf());
 
 			ActorRef last = findLastHuman();
 			for (ActorRef human : humans.keySet()) {
@@ -44,7 +46,7 @@ public class House extends UntypedActor {
 				if (last.equals(human)) {
 					lastNotBussyHuman = true;
 				}
-				human.tell(new StateReport(lightProvidedInThisStep, heatProvidedInThisStep, t.deltaTime, humans, lastNotBussyHuman), getSelf());
+				human.tell(new StateReport(lightProvidedInThisStep, heatProvidedInThisStep, t.deltaTime, t.time, humans, lastNotBussyHuman), getSelf());
 			}
 
 			powerUsedInThisStep = 0;
@@ -69,7 +71,7 @@ public class House extends UntypedActor {
 			}
 			// log.warning("HEAT: "+heatProvidedInThisStep);
 		} else if (message instanceof RegisterForState) {
-			humans.put(getSender(), new HumanStateChanger.StateAndTime(null, null));
+			//humans.put(getSender(), new HumanStateChanger.StateAndTime(null, null));
 		} else if (message instanceof Human.HumanStateNotice) {
 			Human.HumanStateNotice msg = (Human.HumanStateNotice) message;
 			humans.put(msg.sender, msg.stateAndTime);
@@ -106,15 +108,17 @@ public class House extends UntypedActor {
 		public final double light; // lx
 		public final double temperature;
 		public final double deltaTime;
+		public final LocalDateTime time;
 		public final HashMap<ActorRef, HumanStateChanger.StateAndTime> housemates;
 		public final boolean last;
 
-		public StateReport(double light, double temperature, double deltaTime, HashMap<ActorRef, HumanStateChanger.StateAndTime> housemates, boolean last) {
+		public StateReport(double light, double temperature, double deltaTime, LocalDateTime time, HashMap<ActorRef, HumanStateChanger.StateAndTime> housemates, boolean last) {
 			this.light = light;
 			this.temperature = temperature;
 			this.deltaTime = deltaTime;
 			this.housemates = housemates;
 			this.last = last;
+			this.time = time;
 		}
 	}
 

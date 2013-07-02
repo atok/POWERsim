@@ -53,14 +53,20 @@ public class SimulationLoader {
 
     private SimulationLoaderContext loaderContext = new SimulationLoaderContext();
 
-    public Simulation loadSimulation(String filePath) throws Exception {
+
+    public Simulation loadSimulation(File file) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(new File(filePath));
+        JsonNode rootNode = objectMapper.readTree(file);
         Simulation simulation = new Simulation();
 
         loadHouseholds(rootNode, simulation);
 
-        return null;
+        return simulation;
+    }
+
+    
+    public Simulation loadSimulation(String filePath) throws Exception {
+        return loadSimulation(new File(filePath));
     }
 
     private void loadHouseholds(JsonNode rootNode, Simulation simulation) throws Exception {
@@ -90,12 +96,14 @@ public class SimulationLoader {
             JsonNode device = devices.next();
             String deviceId = device.path(DEVICE_ID).asText();
             String deviceClassName = device.path(DEVICE_CLASS).asText();
+            String[] fragments = deviceClassName.split("\\.");
+            String deviceType = fragments[fragments.length-1];
             System.out.println("Creating device " + deviceId + " of class " + deviceClassName);
             Class deviceClass = Class.forName(deviceClassName);
 
             Map<String, String> parameters = loadParameters(device);
 
-            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceId, loaderContext.currentHouse, parameters);
+            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceType+":"+deviceId, loaderContext.currentHouse, parameters);
             loaderContext.devicesInHouse.add(new Human.DeviceToken(deviceClass, deviceActorRef));
         }
     }
@@ -119,7 +127,7 @@ public class SimulationLoader {
     private void createHouse(JsonNode houseNode, Simulation simulation) throws Exception {
         String houseId = houseNode.path(HOUSE_ID).asText();
         System.out.println("Creating household " + houseId);
-        loaderContext.currentHouse = simulation.addHouse(House.class, houseId);
+        loaderContext.currentHouse = simulation.addHouse(House.class, "House:"+houseId);
     }
 
     private void loadHumans(JsonNode rootNode, Simulation simulation) throws Exception {
@@ -148,7 +156,7 @@ public class SimulationLoader {
                 currentValue = human.path(WARM_TRESHOLD);
                 humanCharacter.setWarmComfortTreshold(currentValue.asDouble());
 
-                simulation.addHuman(Human.class, humanId, loaderContext.currentHouse, loaderContext.devicesInHouse, humanCharacter, loadHumanStateChangeTimes(human));
+                simulation.addHuman(Human.class, "Human:"+humanId, loaderContext.currentHouse, loaderContext.devicesInHouse, humanCharacter, loadHumanStateChangeTimes(human));
             }
 
         } else {
@@ -171,9 +179,9 @@ public class SimulationLoader {
                 String tillTime = null;
                 Date tillDate = null;
                 Integer duration = null;
-                if(state.hasNonNull(FROM_TIME)) {
-                    tillTime = state.path(FROM_TIME).asText();
-                    tillDate = dateFormat.parse(fromTime);
+                if(state.hasNonNull(TILL_TIME)) {
+                    tillTime = state.path(TILL_TIME).asText();
+                    tillDate = dateFormat.parse(tillTime);
                 } else {
                     duration = state.path(DURATION).asInt();
                 }

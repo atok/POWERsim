@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import org.joda.time.LocalDateTime;
+
 public class Human extends BaseHuman {
 
 	ClockActor.TimeSignal currentTime;
@@ -52,16 +54,16 @@ public class Human extends BaseHuman {
 
 	@Override
 	protected void onHouseState(House.StateReport report) {
-		lightActions(report.light, report.deltaTime);
-		radiatorActions(report.temperature, report.deltaTime);
+		lightActions(report.light, report.deltaTime, report.time);
+		radiatorActions(report.temperature, report.deltaTime, report.time);
 	}
 
-	private void radiatorActions(double temperature, double deltaTime) {
+	private void radiatorActions(double temperature, double deltaTime, LocalDateTime time) {
 		if (getState() == HumanState.INSIDE) {
 			if (temperature < humanCharacter.warmComfortTreshold * deltaTime) {
-				requestMoreHeat();
+				requestMoreHeat(time);
 			} else if (temperature > humanCharacter.overheatComfortTreshold * deltaTime) {
-				requestLessHeat();
+				requestLessHeat(time);
 			}
 		} else if (getState() == HumanState.SLEEPING) {
 
@@ -69,58 +71,58 @@ public class Human extends BaseHuman {
 
 	}
 
-	private void requestLessHeat() {
+	private void requestLessHeat(LocalDateTime time) {
 		for (DeviceTokenWithState device : getDevices()) {
 			if (device.is(DeviceType.HEATING) && device.state.isOn == true && device.stateChangeRequested == false) {
-				device.actor.tell(new ElectricHeater.OnOffSignal(false), getSelf());
+				device.actor.tell(new ElectricHeater.OnOffSignal(false, time), getSelf());
 				break;
 			}
 		}
 	}
 
-	private void requestMoreHeat() {
+	private void requestMoreHeat(LocalDateTime time) {
 		for (DeviceTokenWithState device : getDevices()) {
 			if (device.is(DeviceType.HEATING) && device.state.isOn == false && device.stateChangeRequested == false) {
-				device.actor.tell(new ElectricHeater.OnOffSignal(true), getSelf());
+				device.actor.tell(new ElectricHeater.OnOffSignal(true, time), getSelf());
 				break;
 			}
 		}
 	}
 
-	private void requestMoreLight() {
+	private void requestMoreLight(LocalDateTime time) {
 		for (DeviceTokenWithState device : getDevices()) {
 			// log.debug("Device types: " + device.getTypesOfDevice());
 			if (device.is(DeviceType.LIGHT) && device.state.isOn == false && device.stateChangeRequested == false) {
-				device.actor.tell(new Lamp.OnOffSignal(true), getSelf());
+				device.actor.tell(new Lamp.OnOffSignal(true, time), getSelf());
 				break;
 			}
 		}
 	}
 
-	private void requestLessLight() {
+	private void requestLessLight(LocalDateTime time) {
 		for (DeviceTokenWithState device : getDevices()) {
 			// log.debug("Device types: " + device.getTypesOfDevice());
 			if (device.is(DeviceType.LIGHT) && device.state.isOn == true && device.stateChangeRequested == false) {
-				device.actor.tell(new Lamp.OnOffSignal(false), getSelf());
+				device.actor.tell(new Lamp.OnOffSignal(false, time), getSelf());
 				break;
 			}
 		}
 
 	}
 
-	private void lightActions(double lightLevel, double deltaTime) {
+	private void lightActions(double lightLevel, double deltaTime, LocalDateTime currentTime) {
 
 		if (getState() == HumanState.INSIDE) {
 			if (lightLevel < humanCharacter.lightComfortTreshold * deltaTime) {
 				log.warning("More light!!!");
-				requestMoreLight();
+				requestMoreLight(currentTime);
 			} else if (lightLevel > humanCharacter.lightOverloadTreshold * deltaTime) {
 				log.warning("Less light!!!");
-				requestLessLight();
+				requestLessLight(currentTime);
 			}
 		} else if (getState() == HumanState.BEFORE_BEDTIME) {
 			if (isLastNotBussy()) {
-				requestLessLight();
+				requestLessLight(currentTime);
 			}
 		} else if (getState() == HumanState.SLEEPING) {
 

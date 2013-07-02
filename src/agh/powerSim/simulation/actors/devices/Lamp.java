@@ -2,62 +2,78 @@ package agh.powerSim.simulation.actors.devices;
 
 import agh.powerSim.simulation.actors.ClockActor;
 import agh.powerSim.simulation.actors.House;
+import agh.powerSim.simulation.actors.utils.CalculateUtils;
+import agh.powerSim.simulation.actors.utils.DataRecorder;
 import akka.actor.ActorRef;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lamp extends BaseDevice{
+import org.joda.time.LocalDateTime;
 
-    private double powerUsage = 10;
-    private double lightGen = 10;
-    private boolean isOn = false;
+public class Lamp extends BaseDevice {
 
-    public Lamp(ActorRef house) {
-        super(house);
-    }
+	private double powerUsage = 10; // Watt
+	private double lightGen = 10;
+	private boolean isOn = false;
+	
+	public static boolean logOn = true;
 
-    public static List<DeviceType> getDeviceTypes() {
-        ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
-        deviceTypes.add(DeviceType.LIGHT);
-        return deviceTypes;
-    }
+	public Lamp(ActorRef house) {
+		super(house);
+	}
 
-    @Override
-    public void onReceive(Object message) throws Exception {
-        if(message instanceof OnOffSignal) {
-            OnOffSignal m = (OnOffSignal)message;
-            isOn = m.state;
-            //log.warning("state := " + isOn);
-        } else {
-            super.onReceive(message);
-        }
-    }
+	public static List<DeviceType> getDeviceTypes() {
+		ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
+		deviceTypes.add(DeviceType.LIGHT);
+		return deviceTypes;
+	}
 
-    protected void onTime(ClockActor.TimeSignal t) {
-        if(isOn) {
-            double power = powerUsage * t.deltaTime;
-            getHouse().tell(new House.PowerUsageSignal(power));
+	@Override
+	public void onReceive(Object message) throws Exception {
+		if (message instanceof OnOffSignal) {
+			OnOffSignal m = (OnOffSignal) message;
+			isOn = m.state;
+			// log.warning("state := " + isOn);
+			if(logOn){
+				getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status"+Boolean.toString(isOn), m.time, getSelf()), getSelf());
+			}
+			
+		} else {
+			super.onReceive(message);
+		}
+	}
 
-            double light = lightGen * t.deltaTime;
-            getHouse().tell(new House.LightSignal(light));
-            
-            log.warning("Lamp is "+(isOn?"ON":"OFF"));
-        }
-    }
+	protected void onTime(ClockActor.TimeSignal t) {
+		if (isOn) {
+			double power = CalculateUtils.powerUsage(powerUsage, t.deltaTime);
+			getHouse().tell(new House.PowerUsageSignal(power));
 
-    @Override
-    public DeviceState getState() {
-        return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON": "OFF", isOn ? "Device is ON": "Device is OFF", getDeviceTypes());
-    }
+	
+			double light = lightGen * t.deltaTime;
+			getHouse().tell(new House.LightSignal(light));
 
-    public static class OnOffSignal {
-        public final boolean state;
+			if(logOn){
+				getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(power, light, t.time, getSelf()), getSelf());
 
-        public OnOffSignal(boolean state) {
-            this.state = state;
-        }
-    }
+				log.warning("Lamp is " + (isOn ? "ON" : "OFF"));
+			}
+		}
+	}
 
+	@Override
+	public DeviceState getState() {
+		return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON" : "OFF", isOn ? "Device is ON" : "Device is OFF", getDeviceTypes());
+	}
+
+	public static class OnOffSignal {
+		public final boolean state;
+		public final LocalDateTime time;
+
+		public OnOffSignal(boolean state, LocalDateTime time) {
+			this.state = state;
+			this.time = time;
+		}
+	}
 
 }

@@ -1,5 +1,7 @@
 package agh.powerSim.simulation.actors;
 
+import org.joda.time.LocalDateTime;
+
 import agh.powerSim.simulation.actors.utils.DataRecorder;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
@@ -27,10 +29,10 @@ public class DataRecorderActor extends UntypedActor {
     }
 
     public static class DataReport {
-        public ClockActor.TimeSignal time;
+        public LocalDateTime time;
         public ActorRef sender;
 
-        public DataReport(ClockActor.TimeSignal time, ActorRef sender) {
+        public DataReport(LocalDateTime time, ActorRef sender) {
             this.time = time;
             this.sender = sender;
         }

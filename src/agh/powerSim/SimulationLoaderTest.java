@@ -16,7 +16,7 @@ public class SimulationLoaderTest {
         SimulationLoader simulationLoader = new SimulationLoader();
         Simulation simulation;
         try {
-            simulation = simulationLoader.loadSimulation("D:\\Projects\\Java\\SmartGrid\\POWERsim\\test.json");
+            simulation = simulationLoader.loadSimulation("C://Users//Darek//git//POWERsim//test.json");
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
