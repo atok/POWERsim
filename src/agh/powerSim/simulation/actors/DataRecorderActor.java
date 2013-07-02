@@ -27,8 +27,8 @@ public class DataRecorderActor extends UntypedActor {
     }
 
     public static class DataReport {
-        ClockActor.TimeSignal time;
-        ActorRef sender;
+        public ClockActor.TimeSignal time;
+        public ActorRef sender;
 
         public DataReport(ClockActor.TimeSignal time, ActorRef sender) {
             this.time = time;
