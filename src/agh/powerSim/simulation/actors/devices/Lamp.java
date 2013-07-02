@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Lamp extends BaseDevice{
 
-    private final double powerUsage = 10;
-    private final double lightGen = 10;
+    private double powerUsage = 10;
+    private double lightGen = 10;
     private boolean isOn = false;
 
     public Lamp(ActorRef house) {

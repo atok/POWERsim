@@ -2,6 +2,8 @@ package agh.powerSim;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import agh.powerSim.gui.Context;
 import agh.powerSim.simulation.Simulation;
@@ -21,10 +23,11 @@ public class WindowStarter {
     public static void run(){
 
         Simulation sim = new Simulation();
+        Map<String, String> mockParams = new HashMap<String, String>();
 
         final ActorRef house = sim.addHouse(House.class, "house-1");
-        final ActorRef lamp =  sim.addDevice(LampView.class, "lamp-1", house);
-        final ActorRef lamp2 =  sim.addDevice(LampView.class, "lamp-2", house);
+        final ActorRef lamp =  sim.addDevice(LampView.class, "lamp-1", house, mockParams);
+        final ActorRef lamp2 =  sim.addDevice(LampView.class, "lamp-2", house, mockParams);
 
         final ArrayList<Human.DeviceToken> devices = new ArrayList<Human.DeviceToken>();
         devices.add(new Human.DeviceToken(Lamp.class, lamp));

@@ -1,18 +1,18 @@
 package agh.powerSim.simulation;
 
 import agh.powerSim.simulation.actors.House;
-import agh.powerSim.simulation.actors.humans.BaseHuman;
-import agh.powerSim.simulation.actors.humans.Human;
-import agh.powerSim.simulation.actors.humans.HumanCharacter;
+import agh.powerSim.simulation.actors.humans.*;
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
+import org.joda.time.DateTime;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.prefs.Preferences;
 
 /**
@@ -38,6 +38,18 @@ public class SimulationLoader {
     private static final String DEVICES = "devices";
     private static final String DEVICE_ID = "id";
     private static final String DEVICE_CLASS = "class";
+
+    private static final String HUMAN_STATES = "states";
+    private static final String STATE = "state";
+    private static final String FROM_TIME = "fromTime";
+    private static final String TILL_TIME = "tillTime";
+    private static final String DURATION = "duration";
+    private static final String DAYS = "days";
+    private static final String MONTHS = "months";
+    private static final String COMMENT = "comment";
+    private static final String PARAMETERS = "parameters";
+
+    private static final String STATE_DATE_FORMAT = "HH:mm";
 
     private SimulationLoaderContext loaderContext = new SimulationLoaderContext();
 
@@ -80,9 +92,28 @@ public class SimulationLoader {
             String deviceClassName = device.path(DEVICE_CLASS).asText();
             System.out.println("Creating device " + deviceId + " of class " + deviceClassName);
             Class deviceClass = Class.forName(deviceClassName);
-            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceId, loaderContext.currentHouse);
+
+            Map<String, String> parameters = loadParameters(device);
+
+            ActorRef deviceActorRef = simulation.addDevice(deviceClass, deviceId, loaderContext.currentHouse, parameters);
             loaderContext.devicesInHouse.add(new Human.DeviceToken(deviceClass, deviceActorRef));
         }
+    }
+
+    private Map<String, String> loadParameters(JsonNode device) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        JsonNode paramsNode = device.path(PARAMETERS);
+        if( !paramsNode.isMissingNode() ) {
+            Iterator<Map.Entry<String, JsonNode>> nodesIt = paramsNode.fields();
+            while(nodesIt.hasNext()) {
+                Map.Entry<String, JsonNode> entry = nodesIt.next();
+                String fieldName = entry.getKey();
+                String fieldValue = entry.getValue().asText();
+                parameters.put(fieldName, fieldValue);
+            }
+        }
+
+        return parameters;
     }
 
     private void createHouse(JsonNode houseNode, Simulation simulation) throws Exception {
@@ -117,12 +148,67 @@ public class SimulationLoader {
                 currentValue = human.path(WARM_TRESHOLD);
                 humanCharacter.setWarmComfortTreshold(currentValue.asDouble());
 
-                simulation.addHuman(Human.class, humanId, loaderContext.currentHouse, loaderContext.devicesInHouse, humanCharacter);
+                simulation.addHuman(Human.class, humanId, loaderContext.currentHouse, loaderContext.devicesInHouse, humanCharacter, loadHumanStateChangeTimes(human));
             }
 
         } else {
             throw new Exception("Humans node is not container node");
         }
+    }
+
+    private HumanStateChangeTime[] loadHumanStateChangeTimes(JsonNode humanNode) throws Exception {
+        List<HumanStateChangeTime> humanStateList = new ArrayList<>();
+        DateFormat dateFormat = new SimpleDateFormat(STATE_DATE_FORMAT);
+        JsonNode humanStates = humanNode.path(HUMAN_STATES);
+        if(humanStates.isContainerNode()) {
+            for(JsonNode state : humanStates) {
+                String stateName = state.path(STATE).asText();
+                HumanState humanState = HumanState.valueOf(stateName);
+
+                String fromTime = state.path(FROM_TIME).asText();
+                Date fromDate = dateFormat.parse(fromTime);
+
+                String tillTime = null;
+                Date tillDate = null;
+                Integer duration = null;
+                if(state.hasNonNull(FROM_TIME)) {
+                    tillTime = state.path(FROM_TIME).asText();
+                    tillDate = dateFormat.parse(fromTime);
+                } else {
+                    duration = state.path(DURATION).asInt();
+                }
+
+                String comment = state.path(COMMENT).asText();
+                Integer[] days = nodeAsArray(state.path(DAYS));
+                Integer[] months = nodeAsArray(state.path(MONTHS));
+
+                HumanStateChangeTime stateChangeTime;
+                if(tillTime != null) {
+                    stateChangeTime = new HumanStateChangeTime(humanState, new DateTime(fromDate.getTime()), new DateTime(tillDate.getTime()), days, months, comment);
+                } else {
+                    stateChangeTime = new HumanStateChangeTime(humanState, new DateTime(fromDate.getTime()), duration, days, months, comment);
+                }
+
+                humanStateList.add(stateChangeTime);
+            }
+        } else {
+            throw new Exception("Human states node is not container node");
+        }
+
+        return humanStateList.toArray(new HumanStateChangeTime[humanStateList.size()]);
+    }
+
+    private Integer[] nodeAsArray(JsonNode node) throws Exception {
+        if(!node.isContainerNode()) {
+            throw new Exception("Node is not container node");
+        }
+
+        List<Integer> array = new ArrayList<>();
+        Iterator<JsonNode> iterator = node.elements();
+        while(iterator.hasNext()) {
+            array.add(iterator.next().asInt());
+        }
+        return (Integer[]) array.toArray(new Integer[array.size()]);
     }
 
     private class SimulationLoaderContext {

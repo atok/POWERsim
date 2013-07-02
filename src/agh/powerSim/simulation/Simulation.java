@@ -17,6 +17,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Simulation {
 
@@ -64,12 +65,15 @@ public class Simulation {
 		return deviceActor;
 	}
 
-	public ActorRef addDevice(final Class<? extends BaseDevice> deviceClass, String name, final ActorRef house) {
+	public ActorRef addDevice(final Class<? extends BaseDevice> deviceClass, String name, final ActorRef house, final Map<String, String> parameters) {
 		Props props = new Props(new UntypedActorFactory() {
 			public UntypedActor create() {
 				try {
 					Constructor<? extends BaseDevice> constructor = deviceClass.getDeclaredConstructor(ActorRef.class);
-					return constructor.newInstance(house);
+					UntypedActor instance = constructor.newInstance(house);
+                    BaseDevice baseDevice = deviceClass.cast(instance);
+                    baseDevice.init(parameters);
+                    return baseDevice;
 				} catch (NoSuchMethodException e) {
 					throw new RuntimeException(e);
 				} catch (InvocationTargetException e) {
@@ -78,8 +82,11 @@ public class Simulation {
 					throw new RuntimeException(e);
 				} catch (IllegalAccessException e) {
 					throw new RuntimeException(e);
-				}
-			}
+				} catch (NoSuchFieldException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+                return null; //TODO is it ok to return null here?
+            }
 		});
 		final ActorRef deviceActor = addActor(props, name);
 		return deviceActor;
