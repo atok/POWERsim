@@ -19,6 +19,7 @@
           <items>
             <MenuItem mnemonicParsing="false" text="Weather" />
             <MenuItem mnemonicParsing="false" text="Database" />
+            <MenuItem mnemonicParsing="false" text="Server" onAction="#serverPopup"/>
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Help">

@@ -7,8 +7,8 @@ package agh.powerSim.simulation.db_model;
  * Time: 23:52
  */
 public class SimulationLog {
-    private int id; // integer
-    private long simulationId; // long
+    private Integer id; // integer
+    private Integer simulationId; // long
     private String actorName; // text
     private String actorType; // text
     private String submitDate; // text: ISO8601 string ("YYYY-MM-DD HH:MM:SS.SSS")
@@ -27,7 +27,7 @@ public class SimulationLog {
         return simulationId;
     }
 
-    public void setSimulationId(long simulationId) {
+    public void setSimulationId(int simulationId) {
         this.simulationId = simulationId;
     }
 
@@ -72,9 +72,22 @@ public class SimulationLog {
 	}
 	
     public SimulationLog() {}
+    
+    public SimulationLog(int simulationId){
+    	this.simulationId = simulationId;
+    }
 
     public SimulationLog(int id, int simulationId, String actorName, String actorType, String submitDate, String eventType, String eventValue) {
         this.id = id;
+        this.simulationId = simulationId;
+        this.actorName = actorName;
+        this.actorType = actorType;
+        this.submitDate = submitDate;
+        this.eventType = eventType;
+        this.eventValue = eventValue;
+    }
+
+    public SimulationLog(int simulationId, String actorName, String actorType, String submitDate, String eventType, String eventValue) {
         this.simulationId = simulationId;
         this.actorName = actorName;
         this.actorType = actorType;

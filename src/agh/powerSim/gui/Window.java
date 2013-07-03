@@ -57,4 +57,9 @@ public class Window extends Application {
 		System.exit(0);
 		super.stop();
 	}
+
+	public static Stage getStage() {
+		return stage;
+	}
+
 }

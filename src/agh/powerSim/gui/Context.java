@@ -24,6 +24,7 @@ import javax.swing.text.html.ObjectView;
 
 import org.w3c.dom.views.AbstractView;
 
+import agh.powerSim.JettyStarter;
 import agh.powerSim.Starter;
 import agh.powerSim.simulation.Simulation;
 import agh.powerSim.simulation.SimulationLoader;
@@ -48,6 +49,8 @@ public class Context {
 	private static SimulationLoader simulationLoader = new SimulationLoader();
 
 	private static Simulation simulation;
+	
+	private static JettyStarter server;
 
 	@SuppressWarnings({ "rawtypes" })
 	public static Controller loadView(String viewPath) {
@@ -72,6 +75,16 @@ public class Context {
 		loader.setLocation(Context.class.getResource(BASE_FXML_PATH));
 		Parent root = (Parent) loader.load(fxmlStream);
 		Controller controller = (Controller) loader.getController();
+		return controller;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static ServerPopup loadServerPopup() throws IOException {
+		InputStream fxmlStream = Context.class.getResourceAsStream(BASE_FXML_PATH + "server" + FXML_SUFFIX);
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Context.class.getResource(BASE_FXML_PATH));
+		Parent root = (Parent) loader.load(fxmlStream);
+		ServerPopup controller = (ServerPopup) loader.getController();
 		return controller;
 	}
 
@@ -111,6 +124,33 @@ public class Context {
 		});
 
 	}
+	
+	public static void runServer(){
+
+		threadPoolExecutor.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					server = new JettyStarter();
+					server.start();
+				} catch (Exception e) {
+					e.printStackTrace(); // To change body of catch statement
+											// use File | Settings | File
+											// Templates.
+				}
+
+			}
+		});
+	}
+	
+	public static void stopServer(){
+		if(server!=null){
+			server.stop();
+		}
+		
+	}
+	
 
 	public static void setWeather(final String sun, final String temp, final String clouds) {
 		if (null != controller) {

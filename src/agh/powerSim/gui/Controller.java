@@ -2,6 +2,7 @@ package agh.powerSim.gui;
 
 
 import java.io.File;
+import java.io.IOException;
 
 import com.typesafe.config.Config;
 
@@ -47,6 +48,8 @@ public class Controller {
 	
 	@FXML
 	Button openButton;
+	
+	ServerPopup serverPopup;
 	
 	private  File file;
 	
@@ -97,6 +100,21 @@ public class Controller {
 		} else {
 			alertBox.setText("Invalid start data");
 			alertBox.setVisible(true);			
+		}
+	}
+	
+	public void serverPopup(ActionEvent event){
+		if(serverPopup==null){
+			try {
+				serverPopup = Context.loadServerPopup();
+
+				serverPopup.open();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			serverPopup.open();
 		}
 	}
 }
