@@ -29,48 +29,45 @@ public class WaterHeater extends BaseDevice {
 
     public static List<DeviceType> getDeviceTypes() {
         ArrayList<DeviceType> deviceTypes = new ArrayList<>(1);
-        deviceTypes.add(DeviceType.MEAL);
+        deviceTypes.add(DeviceType.HEATING);
         return deviceTypes;
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
-        if (message instanceof BaseDevice.OnOffSignal) {
-            BaseDevice.OnOffSignal m = (BaseDevice.OnOffSignal) message;
-            if (!isOn) {
-                isOn = m.state;
-                scheduledOffTime = m.time.plusSeconds(waterHeatTime);
-            }
-
-            if (logOn) {
-                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status " + Boolean.toString(isOn), m.time, getSelf()), getSelf());
-            }
-        } else {
-            super.onReceive(message);
-        }
+        super.onReceive(message);
     }
 
     protected void onTime(ClockActor.TimeSignal t) {
-        if (isOn) {
-            double power = CalculateUtils.powerUsage(powerUsage, t.deltaTime);
-            getHouse().tell(new House.PowerUsageSignal(power));
+        double power = CalculateUtils.powerUsage(powerUsage, t.deltaTime);
+        getHouse().tell(new House.PowerUsageSignal(power));
 
-            if(scheduledOffTime != null && t.time.isAfter(scheduledOffTime)) {
-                scheduledOffTime = null;
-                isOn = false;
-                scheduledOnTime = t.time.plusSeconds(waterColdTime);
-            }
-
-            if(scheduledOnTime != null && t.time.isAfter(scheduledOnTime)) {
-                scheduledOnTime = null;
-                isOn = true;
-                scheduledOffTime = t.time.plusSeconds(waterHeatTime);
-            }
-
+        if(scheduledOffTime == null && scheduledOnTime == null) {
+            scheduledOffTime = t.time.plusSeconds(waterHeatTime);
+            isOn = true;
             if(logOn){
-                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(power, 0, t.time, getSelf()), getSelf());
-                log.warning("Water heater is " + (isOn ? "ON" : "OFF"));
+                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status " + Boolean.toString(isOn), t.time, getSelf()), getSelf());
             }
+        }
+
+        if(scheduledOffTime != null && t.time.isAfter(scheduledOffTime)) {
+            scheduledOffTime = null;
+            isOn = false;
+            scheduledOnTime = t.time.plusSeconds(waterColdTime);
+            if(logOn){
+                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status " + Boolean.toString(isOn), t.time, getSelf()), getSelf());
+            }
+        }
+
+        if(scheduledOnTime != null && t.time.isAfter(scheduledOnTime)) {
+            scheduledOnTime = null;
+            isOn = true;
+            scheduledOffTime = t.time.plusSeconds(waterHeatTime);
+        }
+
+        if(logOn){
+            getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(power, 0, t.time, getSelf()), getSelf());
+            log.warning("Water heater is " + (isOn ? "ON" : "OFF"));
         }
     }
 
