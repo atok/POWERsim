@@ -49,7 +49,7 @@ public class Lamp extends BaseDevice {
 			double power = CalculateUtils.powerUsage(powerUsage, t.deltaTime);
 			getHouse().tell(new House.PowerUsageSignal(power));
 
-	
+
 			double light = lightGen * t.deltaTime;
 			getHouse().tell(new House.LightSignal(light));
 
@@ -66,14 +66,6 @@ public class Lamp extends BaseDevice {
 		return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON" : "OFF", isOn ? "Device is ON" : "Device is OFF", getDeviceTypes());
 	}
 
-	public static class OnOffSignal {
-		public final boolean state;
-		public final LocalDateTime time;
 
-		public OnOffSignal(boolean state, LocalDateTime time) {
-			this.state = state;
-			this.time = time;
-		}
-	}
 
 }

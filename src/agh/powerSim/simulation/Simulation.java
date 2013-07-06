@@ -83,9 +83,8 @@ public class Simulation {
 				} catch (IllegalAccessException e) {
 					throw new RuntimeException(e);
 				} catch (NoSuchFieldException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    throw new RuntimeException(e);
                 }
-                return null; //TODO is it ok to return null here?
             }
 		});
 		final ActorRef deviceActor = addActor(props, name);
