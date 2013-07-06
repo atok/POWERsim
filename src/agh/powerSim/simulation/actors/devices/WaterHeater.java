@@ -19,7 +19,7 @@ public class WaterHeater extends BaseDevice {
     private LocalDateTime scheduledOffTime = null;
     private LocalDateTime scheduledOnTime = null;
 
-    private boolean isOn = false;
+    private boolean isOn = true;    // ON by default!
 
     public static boolean logOn = true;
 
@@ -69,8 +69,7 @@ public class WaterHeater extends BaseDevice {
 
             if(logOn){
                 getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(power, 0, t.time, getSelf()), getSelf());
-
-                log.warning("Kettle is " + (isOn ? "ON" : "OFF"));
+                log.warning("Water heater is " + (isOn ? "ON" : "OFF"));
             }
         }
     }

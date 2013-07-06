@@ -94,7 +94,7 @@ public class Context {
 
 	public static int duration = 1;
 
-	public static int delay = 10;
+	public static int delay = 100;
 
 	public static File file;
 

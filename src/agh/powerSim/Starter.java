@@ -4,10 +4,8 @@ import agh.powerSim.simulation.Simulation;
 import agh.powerSim.simulation.actors.SleepActor;
 import agh.powerSim.simulation.actors.House;
 import agh.powerSim.simulation.actors.devices.ElectricHeater;
-import agh.powerSim.simulation.actors.humans.Human;
-import agh.powerSim.simulation.actors.humans.HumanCharacter;
-import agh.powerSim.simulation.actors.humans.HumanState;
-import agh.powerSim.simulation.actors.humans.HumanStateChangeTime;
+import agh.powerSim.simulation.actors.devices.WaterHeater;
+import agh.powerSim.simulation.actors.humans.*;
 import agh.powerSim.simulation.actors.devices.Lamp;
 import agh.powerSim.simulation.actors.environment.WeatherActor;
 import akka.actor.ActorRef;
@@ -34,12 +32,14 @@ public class Starter {
 		final ActorRef lamp2 = sim.addDevice(Lamp.class, "Lamp:lamp-2", house, parametersLamp);
 		final ActorRef lamp3 = sim.addDevice(Lamp.class, "Lamp:lamp-3", house, parametersLamp);
 		final ActorRef heater = sim.addDevice(ElectricHeater.class, "Heater:heater-1", house, parametersHeater);
+        final ActorRef waterHeater = sim.addDevice(WaterHeater.class, "WaterHeater:wh-1", house, new HashMap<String,String>());
 
 		final ArrayList<Human.DeviceToken> devices = new ArrayList<Human.DeviceToken>();
 		devices.add(new Human.DeviceToken(Lamp.class, lamp1));
 		devices.add(new Human.DeviceToken(Lamp.class, lamp2));
 		devices.add(new Human.DeviceToken(Lamp.class, lamp3));
 		devices.add(new Human.DeviceToken(ElectricHeater.class, heater));
+        devices.add(new Human.DeviceToken(WaterHeater.class, waterHeater));
 		// sleeping: every day of every month from 23.10 6 hours
 		HumanStateChangeTime sleepTime = new HumanStateChangeTime(HumanState.SLEEPING, new DateTime(1, 1, 1, 23, 10), 1000 * 60 * 60 * 6, new Integer[] {}, new Integer[] {}, "Sleep time");
 		// work: from monday to friday every month exept July from 8:00 9 hours
