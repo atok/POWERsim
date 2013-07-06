@@ -88,13 +88,34 @@ public class Context {
 		return controller;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static DbPopup loadDbPopup() throws IOException {
+		InputStream fxmlStream = Context.class.getResourceAsStream(BASE_FXML_PATH + "db" + FXML_SUFFIX);
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Context.class.getResource(BASE_FXML_PATH));
+		Parent root = (Parent) loader.load(fxmlStream);
+		DbPopup controller = (DbPopup) loader.getController();
+		return controller;
+	}
+
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static WeatherPopup loadWeatherPopup() throws IOException {
+		InputStream fxmlStream = Context.class.getResourceAsStream(BASE_FXML_PATH + "weather" + FXML_SUFFIX);
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(Context.class.getResource(BASE_FXML_PATH));
+		Parent root = (Parent) loader.load(fxmlStream);
+		WeatherPopup controller = (WeatherPopup) loader.getController();
+		return controller;
+	}
+	
 	public static Parent getView() {
 		return controller.getRoot();
 	}
 
 	public static int duration = 1;
 
-	public static int delay = 10;
+	public static int delay = 100;
 
 	public static File file;
 

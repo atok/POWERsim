@@ -51,6 +51,10 @@ public class Controller {
 	
 	ServerPopup serverPopup;
 	
+	DbPopup dbPopup;
+	
+	WeatherPopup weatherPopup;
+	
 	private  File file;
 	
 	public int getDelay(){
@@ -102,6 +106,21 @@ public class Controller {
 			alertBox.setVisible(true);			
 		}
 	}
+
+	public void weatherPopup(ActionEvent event){
+		if(weatherPopup==null){
+			try {
+				weatherPopup = Context.loadWeatherPopup();
+
+				weatherPopup.open();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			weatherPopup.open();
+		}
+	}
 	
 	public void serverPopup(ActionEvent event){
 		if(serverPopup==null){
@@ -115,6 +134,21 @@ public class Controller {
 			}
 		} else {
 			serverPopup.open();
+		}
+	}
+
+	public void dbPopup(ActionEvent event){
+		if(dbPopup==null){
+			try {
+				dbPopup = Context.loadDbPopup();
+
+				dbPopup.open();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			dbPopup.open();
 		}
 	}
 }

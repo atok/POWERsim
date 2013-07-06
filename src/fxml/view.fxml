@@ -17,8 +17,8 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Settings">
           <items>
-            <MenuItem mnemonicParsing="false" text="Weather" />
-            <MenuItem mnemonicParsing="false" text="Database" />
+            <MenuItem mnemonicParsing="false" text="Weather" onAction="#weatherPopup"/>
+            <MenuItem mnemonicParsing="false" text="Database" onAction="#dbPopup"/>
             <MenuItem mnemonicParsing="false" text="Server" onAction="#serverPopup"/>
           </items>
         </Menu>

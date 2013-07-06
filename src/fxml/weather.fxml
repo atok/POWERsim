@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" style="-fx-background-color: linear-gradient(from 0px 0px to 0px 400px, lightgray, gray 50%, dimgray 99%, white);&#10;&#10;" xmlns:fx="http://javafx.com/fxml" fx:controller="agh.powerSim.gui.WeatherPopup">
+  <children>
+    <Button fx:id="start" layoutX="249.0" layoutY="165.0" mnemonicParsing="false" onAction="#ok" text="OK" />
+    <Button fx:id="kill" layoutX="261.0" layoutY="6.0" mnemonicParsing="false" onAction="#close" text="X" />
+    <ProgressIndicator fx:id="status" layoutX="14.0" layoutY="157.0" progress="0.0" visible="false" />
+    <ScrollPane layoutX="14.0" layoutY="14.0" prefHeight="172.0" prefWidth="222.0">
+      <content>
+        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="762.0" prefWidth="207.0" style="-fx-background-color: linear-gradient(from 0px 0px to 0px 400px, lightgray, gray 50%, dimgray 99%, white);&#10;&#10;">
+          <children>
+            <TextField layoutX="14.0" layoutY="392.0" prefWidth="41.0" text="2.0" />
+            <TextField layoutX="66.0" layoutY="392.0" prefWidth="41.0" text="-3.1" />
+            <TextField layoutX="115.0" layoutY="392.0" prefWidth="41.0" text="-15.1" />
+            <Label layoutX="14.0" layoutY="422.0" text="July" />
+            <TextField layoutX="14.0" layoutY="447.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="447.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="447.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="480.0" text="August" />
+            <TextField layoutX="14.0" layoutY="505.0" prefWidth="41.0" text="5.6" />
+            <TextField layoutX="66.0" layoutY="505.0" prefWidth="41.0" text="1.3" />
+            <TextField layoutX="115.0" layoutY="505.0" prefWidth="41.0" text="-4.3" />
+            <Label layoutX="14.0" layoutY="537.0" text="September" />
+            <TextField layoutX="14.0" layoutY="562.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="562.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="562.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="592.0" text="October" />
+            <TextField layoutX="14.0" layoutY="617.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="617.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="617.0" prefWidth="41.0" text="-11.6" />
+            <TextField layoutX="55.0" layoutY="14.0" prefWidth="80.0" text="50.075651" />
+            <Label layoutX="14.0" layoutY="17.0" text="Lat" />
+            <Label layoutX="14.0" layoutY="43.0" text="Long" />
+            <TextField layoutX="55.0" layoutY="40.0" prefWidth="80.0" text="19.940186" />
+            <Separator layoutX="7.0" layoutY="73.0" prefWidth="200.0" />
+            <Label layoutX="14.0" layoutY="85.0" text="January" />
+            <TextField layoutX="14.0" layoutY="110.0" prefWidth="41.0" text="2.0" />
+            <TextField layoutX="66.0" layoutY="110.0" prefWidth="41.0" text="-3.1" />
+            <TextField layoutX="115.0" layoutY="110.0" prefWidth="41.0" text="-15.1" />
+            <Label layoutX="14.0" layoutY="140.0" text="February" />
+            <TextField layoutX="14.0" layoutY="165.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="165.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="165.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="198.0" text="March" />
+            <TextField layoutX="14.0" layoutY="223.0" prefWidth="41.0" text="5.6" />
+            <TextField layoutX="66.0" layoutY="223.0" prefWidth="41.0" text="1.3" />
+            <TextField layoutX="115.0" layoutY="223.0" prefWidth="41.0" text="-4.3" />
+            <Label layoutX="14.0" layoutY="255.0" text="April" />
+            <TextField layoutX="14.0" layoutY="280.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="280.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="280.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="310.0" text="May" />
+            <TextField layoutX="14.0" layoutY="335.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="335.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="335.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="367.0" text="June" />
+            <Label layoutX="14.0" layoutY="646.0" text="November" />
+            <TextField layoutX="14.0" layoutY="671.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="671.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="671.0" prefWidth="41.0" text="-11.6" />
+            <Label layoutX="14.0" layoutY="701.0" text="Devember" />
+            <TextField layoutX="14.0" layoutY="726.0" prefWidth="41.0" text="4.1" />
+            <TextField layoutX="66.0" layoutY="726.0" prefWidth="41.0" text="-2.5" />
+            <TextField layoutX="115.0" layoutY="726.0" prefWidth="41.0" text="-11.6" />
+          </children>
+        </AnchorPane>
+      </content>
+    </ScrollPane>
+  </children>
+</AnchorPane>
