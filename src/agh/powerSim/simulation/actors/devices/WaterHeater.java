@@ -11,18 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MicrowaveOven extends BaseDevice {
+public class WaterHeater extends BaseDevice {
 
-    private double powerUsage = 1100; // [Watt]
-    private int cookTimeBase = 30; // [second]
-    private int cookBoilTimeBonus = 180;
+    private double powerUsage = 2400; // [Watt]
+    private int waterHeatTime = 120; // [second]
+    private int waterColdTime = 480; // [second]
     private LocalDateTime scheduledOffTime = null;
+    private LocalDateTime scheduledOnTime = null;
 
     private boolean isOn = false;
 
     public static boolean logOn = true;
 
-    public MicrowaveOven(ActorRef house) {
+    public WaterHeater(ActorRef house) {
         super(house);
     }
 
@@ -36,13 +37,13 @@ public class MicrowaveOven extends BaseDevice {
     public void onReceive(Object message) throws Exception {
         if (message instanceof BaseDevice.OnOffSignal) {
             BaseDevice.OnOffSignal m = (BaseDevice.OnOffSignal) message;
-            if(!isOn) {
+            if (!isOn) {
                 isOn = m.state;
-                scheduledOffTime = m.time.plusSeconds(cookTimeBase + (new Random()).nextInt(cookBoilTimeBonus));
+                scheduledOffTime = m.time.plusSeconds(waterHeatTime);
             }
 
-            if(logOn){
-                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status"+Boolean.toString(isOn), m.time, getSelf()), getSelf());
+            if (logOn) {
+                getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.StatusRecord("OnOff status " + Boolean.toString(isOn), m.time, getSelf()), getSelf());
             }
         } else {
             super.onReceive(message);
@@ -57,6 +58,13 @@ public class MicrowaveOven extends BaseDevice {
             if(scheduledOffTime != null && t.time.isAfter(scheduledOffTime)) {
                 scheduledOffTime = null;
                 isOn = false;
+                scheduledOnTime = t.time.plusSeconds(waterColdTime);
+            }
+
+            if(scheduledOnTime != null && t.time.isAfter(scheduledOnTime)) {
+                scheduledOnTime = null;
+                isOn = true;
+                scheduledOffTime = t.time.plusSeconds(waterHeatTime);
             }
 
             if(logOn){
@@ -71,4 +79,6 @@ public class MicrowaveOven extends BaseDevice {
     public BaseDevice.DeviceState getState() {
         return new BaseDevice.DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON" : "OFF", isOn ? "Device is ON" : "Device is OFF", getDeviceTypes());
     }
+
+
 }

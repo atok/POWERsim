@@ -16,7 +16,7 @@ public class ElectricKettle extends BaseDevice {
     private double powerUsage = 2200; // [Watt]
     private int waterBoilTimeBase = 180; // [second]
     private int waterBoilTimeBonus = 60;
-    private LocalDateTime scheduledOfTime = null;
+    private LocalDateTime scheduledOffTime = null;
 
     private boolean isOn = false;
 
@@ -38,7 +38,7 @@ public class ElectricKettle extends BaseDevice {
             BaseDevice.OnOffSignal m = (BaseDevice.OnOffSignal) message;
             if(!isOn) {
                 isOn = m.state;
-                scheduledOfTime = m.time.plusSeconds(waterBoilTimeBase + (new Random()).nextInt(waterBoilTimeBonus));
+                scheduledOffTime = m.time.plusSeconds(waterBoilTimeBase + (new Random()).nextInt(waterBoilTimeBonus));
             }
 
             if(logOn){
@@ -54,7 +54,8 @@ public class ElectricKettle extends BaseDevice {
             double power = CalculateUtils.powerUsage(powerUsage, t.deltaTime);
             getHouse().tell(new House.PowerUsageSignal(power));
 
-            if(t.time.isAfter(scheduledOfTime)) {
+            if(scheduledOffTime != null && t.time.isAfter(scheduledOffTime)) {
+                scheduledOffTime = null;
                 isOn = false;
             }
 
