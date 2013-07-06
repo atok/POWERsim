@@ -6,6 +6,7 @@ import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import org.joda.time.LocalDateTime;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -77,6 +78,16 @@ public abstract class BaseDevice extends UntypedActor {
             this.stateTitle = stateTitle;
             this.stateDescription = stateDescription;
             this.deviceTypes = deviceTypes;
+        }
+    }
+
+    public static class OnOffSignal {
+        public final boolean state;
+        public final LocalDateTime time;
+
+        public OnOffSignal(boolean state, LocalDateTime time) {
+            this.state = state;
+            this.time = time;
         }
     }
 
