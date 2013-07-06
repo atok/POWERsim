@@ -65,14 +65,4 @@ public class ElectricHeater extends BaseDevice {
         return new DeviceState(isOn, isOn ? powerUsage : 0, isOn ? "ON": "OFF", isOn ? "Device is ON": "Device is OFF", getDeviceTypes());
     }
 
-    public static class OnOffSignal {
-        public final boolean state;
-        public final LocalDateTime time;
-
-        public OnOffSignal(boolean state, LocalDateTime time) {
-            this.state = state;
-            this.time = time;
-        }
-    }
-
 }
