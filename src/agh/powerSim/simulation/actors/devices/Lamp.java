@@ -22,7 +22,7 @@ public class Lamp extends BaseDevice {
 	public Lamp(ActorRef house) {
 		super(house);
 	}
-
+ 
 	public static List<DeviceType> getDeviceTypes() {
 		ArrayList<DeviceType> deviceTypes = new ArrayList<DeviceType>(1);
 		deviceTypes.add(DeviceType.LIGHT);

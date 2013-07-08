@@ -115,7 +115,7 @@ public class Context {
 
 	public static int duration = 1;
 
-	public static int delay = 100;
+	public static int delay = 5;
 
 	public static File file;
 
@@ -135,6 +135,28 @@ public class Context {
 					simulation = simulationLoader.loadSimulation(Context.file);
 					simulation.addActor(SleepActor.class, "slowdown");
 					simulation.start();
+				} catch (Exception e) {
+					e.printStackTrace(); // To change body of catch statement
+											// use File | Settings | File
+											// Templates.
+				}
+
+			}
+		});
+
+	}
+	public static void runDefSimulation(int duration, int delay) {
+
+		Context.duration = duration;
+		Context.delay = delay;
+		Context.file = file;
+
+		threadPoolExecutor.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Starter.main(null);
 				} catch (Exception e) {
 					e.printStackTrace(); // To change body of catch statement
 											// use File | Settings | File
@@ -211,6 +233,7 @@ public class Context {
 					controller.startButton.setText("Start");
 					controller.startButton.setDisable(false);
 					controller.openButton.setDisable(false);
+					controller.disableAll(false);
 
 				}
 			});

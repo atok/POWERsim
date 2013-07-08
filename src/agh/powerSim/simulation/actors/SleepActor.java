@@ -15,8 +15,7 @@ public class SleepActor extends UntypedActor {
     public void preStart() {
         super.preStart();
         getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), SleepActor.class), getSelf());
-        log.warning("SleepActor ENABLED (t = " + getTimeToSleep() + " ms)");
-    }
+            }
 
     @Override
     public void onReceive(Object message) throws Exception {

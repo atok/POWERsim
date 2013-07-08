@@ -16,10 +16,13 @@ import java.util.Set;
 
 public abstract class BaseDevice extends UntypedActor {
 
+	public static boolean logOn = true;
+	
     protected LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private final ActorRef house;
 
+    
     public BaseDevice( ActorRef house) {
         this.house = house;
     }

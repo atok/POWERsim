@@ -3,8 +3,9 @@ package agh.powerSim.simulation.actors.humans;
 public class HumanCharacter {//characteristics
     int lightComfortTreshold = 100; //sum of lightbulbs power
     int lightOverloadTreshold = 150; //max 
-    int entertainment = 50;
-    int hunger;
+    int entertainment;
+    int hungerConfortTreshold = 1400; //kalorie
+    int hunger=hungerConfortTreshold;
     int workDuty;
     int cleaner;
     double warmComfortTreshold = 16.0;

@@ -17,191 +17,210 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- Actor responsible of sending TimeSignals to every other time dependant actor in the system.
- To register for time events use
+ * Actor responsible of sending TimeSignals to every other time dependant actor
+ * in the system. To register for time events use
  */
 public class ClockActor extends UntypedActor {
 
-    HashMap<ActorRef, ActorItem> registeredActors = new HashMap<ActorRef, ActorItem>();
-    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+	HashMap<ActorRef, ActorItem> registeredActors = new HashMap<ActorRef, ActorItem>();
+	LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-    LocalDateTime now = null;
-    int timeDelta = 0; //seconds
-    
+	public static boolean logOn = true;
 
-    public static enum TurnType {houses, devices, humans, others};
-    private TurnType turn = null;
+	LocalDateTime now = null;
+	int timeDelta = 0; // seconds
 
-    @Override
-    public void preStart() {
-        super.preStart();
-        getContext().system().eventStream().subscribe(getSelf(), DeadLetter.class);
-    }
+	public static enum TurnType {
+		houses, devices, humans, others
+	};
 
-    @Override
-    public void onReceive(Object message) throws Exception {
-        if (message instanceof StartSimulation) {            //Start simulation with a given deltaTime and startDate
-            StartSimulation time = (StartSimulation)message;
-            timeDelta = time.timeDelta;
-            now = time.time;
-            log.warning("Time has started from " + time.time + " with delta = " + timeDelta + " seconds");
-            tryToSendTimeSignal();
-        } else if (message instanceof  RegisterActorSignal) {
-            RegisterActorSignal s = (RegisterActorSignal)message;
-            registerActor(s);
-        } else if (message instanceof DoneSignal) {
-            markActorAsReady(getSender());
-        } else if (message instanceof DeadLetter) {
-            log.error("!!!!" + message.toString());
-        } else {
-            unhandled(message);
-        }
-    }
+	private TurnType turn = null;
 
-    private boolean tryToSendTimeSignal() {
-        boolean allReady = true;
-        for(Map.Entry<ActorRef, ActorItem> item: registeredActors.entrySet()) {
-            if (!item.getValue().ready){
-                allReady = false;
-                break;
-            }
-        }
-        if(!allReady)
-            return false;
+	@Override
+	public void preStart() {
+		super.preStart();
+		getContext().system().eventStream().subscribe(getSelf(), DeadLetter.class);
+	}
 
-        sendTimeSignal();
-        return true;
-    }
+	@Override
+	public void onReceive(Object message) throws Exception {
+		if (message instanceof StartSimulation) { // Start simulation with a
+													// given deltaTime and
+													// startDate
+			StartSimulation time = (StartSimulation) message;
+			timeDelta = time.timeDelta;
+			now = time.time;
+			if (logOn)
+				log.warning("Time has started from " + time.time + " with delta = " + timeDelta + " seconds");
+			tryToSendTimeSignal();
+		} else if (message instanceof RegisterActorSignal) {
+			RegisterActorSignal s = (RegisterActorSignal) message;
+			registerActor(s);
+		} else if (message instanceof DoneSignal) {
+			markActorAsReady(getSender());
+		} else if (message instanceof DeadLetter) {
+			if (logOn)
+				log.error("!!!!" + message.toString());
+		} else {
+			unhandled(message);
+		}
+	}
 
-    private void sendTimeSignal() {
-    	
-    	if(now.isAfter(LocalDateTime.fromDateFields(new Date(1000*60*60*24*Context.duration)))){
-    		for(ActorRef ref: registeredActors.keySet()){
-    			context().stop(ref);
-    			Context.enable();
-    		}
-    		context().stop(getSelf());
-    	}
+	private boolean tryToSendTimeSignal() {
+		boolean allReady = true;
+		for (Map.Entry<ActorRef, ActorItem> item : registeredActors.entrySet()) {
+			if (!item.getValue().ready) {
+				allReady = false;
+				break;
+			}
+		}
+		if (!allReady)
+			return false;
 
-        if(turn == null) {
-            turn = TurnType.houses;
-        } else if (turn == TurnType.houses) {
-            turn = TurnType.devices;
-        } else if (turn == TurnType.devices) {
-            turn = TurnType.humans;
-        } else if (turn == TurnType.humans) {
-            turn = TurnType.others;
-        } else if (turn == TurnType.others) {
-            turn = TurnType.houses;
-            now = now.plusSeconds(timeDelta);
-            Context.setTime(now.toString());
-            log.warning("Moving time to " + now);
-        }
+		sendTimeSignal();
+		return true;
+	}
 
-//        log.warning("turn: " + turn);
+	private void sendTimeSignal() {
 
-        boolean nothingToDo = true;
+		if (now.isAfter(LocalDateTime.fromDateFields(new Date(1000 * 60 * 60 * 24 * Context.duration)))) {
+			for (ActorRef ref : registeredActors.keySet()) {
+				context().stop(ref);
+				Context.enable();
+			}
+			context().stop(getSelf());
+		}
 
-        // TODO 3 lists (SLOOOOW)
-        for(Map.Entry<ActorRef, ActorItem> item: registeredActors.entrySet()) {
+		if (turn == null) {
+			turn = TurnType.houses;
+		} else if (turn == TurnType.houses) {
+			turn = TurnType.devices;
+		} else if (turn == TurnType.devices) {
+			turn = TurnType.humans;
+		} else if (turn == TurnType.humans) {
+			turn = TurnType.others;
+		} else if (turn == TurnType.others) {
+			turn = TurnType.houses;
+			now = now.plusSeconds(timeDelta);
+			Context.setTime(now.toString());
+			if (logOn)
+				log.warning("Moving time to " + now);
+		}
 
-            if(turn == TurnType.houses) {
-                if(House.class.isAssignableFrom(item.getValue().type)) {
-                    sendTimeSignalTo(item.getValue());
-                    nothingToDo = false;
-                }
-            }else if(turn == TurnType.devices) {
-                if(BaseDevice.class.isAssignableFrom(item.getValue().type)) {
-                    sendTimeSignalTo(item.getValue());
-                    nothingToDo = false;
-                }
-            } else if(turn == TurnType.humans) {
-                if(BaseHuman.class.isAssignableFrom(item.getValue().type)) {
-                    sendTimeSignalTo(item.getValue());
-                    nothingToDo = false;
-                }
-            } else if(turn == TurnType.others) {
-                if(!BaseHuman.class.isAssignableFrom(item.getValue().type)
-                        && !BaseDevice.class.isAssignableFrom(item.getValue().type)
-                        && !House.class.isAssignableFrom(item.getValue().type) ) {
-                    sendTimeSignalTo(item.getValue());
-                    nothingToDo = false;
-                }
-            }
-        }
+		// log.warning("turn: " + turn);
 
-        if(nothingToDo) {
-            sendTimeSignal();
-        }
-    }
+		boolean nothingToDo = true;
 
-    private void sendTimeSignalTo(ActorItem actor) {
-        actor.ready = false;
-        actor.actor.tell(new TimeSignal(timeDelta, new LocalDateTime(now)), getSelf());
-    }
+		// TODO 3 lists (SLOOOOW)
+		for (Map.Entry<ActorRef, ActorItem> item : registeredActors.entrySet()) {
 
-    private void registerActor(RegisterActorSignal actor) {
-        registeredActors.put(actor.actor, new ActorItem(actor.actor, actor.type));
-        log.warning("Actor registered: " + actor);
-    }
+			if (turn == TurnType.houses) {
+				if (House.class.isAssignableFrom(item.getValue().type)) {
+					sendTimeSignalTo(item.getValue());
+					nothingToDo = false;
+				}
+			} else if (turn == TurnType.devices) {
+				if (BaseDevice.class.isAssignableFrom(item.getValue().type)) {
+					sendTimeSignalTo(item.getValue());
+					nothingToDo = false;
+				}
+			} else if (turn == TurnType.humans) {
+				if (BaseHuman.class.isAssignableFrom(item.getValue().type)) {
+					sendTimeSignalTo(item.getValue());
+					nothingToDo = false;
+				}
+			} else if (turn == TurnType.others) {
+				if (!BaseHuman.class.isAssignableFrom(item.getValue().type) && !BaseDevice.class.isAssignableFrom(item.getValue().type) && !House.class.isAssignableFrom(item.getValue().type)) {
+					sendTimeSignalTo(item.getValue());
+					nothingToDo = false;
+				}
+			}
+		}
 
-    private void markActorAsReady(ActorRef actor) {
-        registeredActors.get(actor).ready = true;
-        tryToSendTimeSignal();  // TODO optimization (no need to check every time)
-    }
+		if (nothingToDo) {
+			sendTimeSignal();
+		}
+	}
 
-    private static class ActorItem {
-        public ActorRef actor;
-        public boolean ready;
-        public final Class<?> type;
-        private ActorItem(ActorRef actor, Class<?> type) {
-            this.actor = actor;
-            this.type = type;
-            ready = true;
-        }
-    }
+	private void sendTimeSignalTo(ActorItem actor) {
+		actor.ready = false;
+		actor.actor.tell(new TimeSignal(timeDelta, new LocalDateTime(now)), getSelf());
+	}
 
-    //  SIGNALS
+	private void registerActor(RegisterActorSignal actor) {
+		registeredActors.put(actor.actor, new ActorItem(actor.actor, actor.type));
+		log.warning("Actor registered: " + actor);
+	}
 
-    public static class StartSimulation {
-        final int timeDelta; //seconds
-        final LocalDateTime time;
-        /**
-         * @param timeDelta time step length in seconds
-         * @param time actual calendar time
-         */
-        public StartSimulation(int timeDelta, LocalDateTime time) {
-            this.timeDelta = timeDelta;
-            this.time = time;
-        }
-    }
+	private void markActorAsReady(ActorRef actor) {
+		registeredActors.get(actor).ready = true;
+		tryToSendTimeSignal(); // TODO optimization (no need to check every
+								// time)
+	}
 
-    public static class StopSimulation {}
+	private static class ActorItem {
+		public ActorRef actor;
+		public boolean ready;
+		public final Class<?> type;
 
-    public static class RegisterActorSignal {
-        public final ActorRef actor;
-        public final Class<?> type;
-        public RegisterActorSignal(ActorRef rector, Class<?> type) {
-            this.actor = rector;
-            this.type = type;
-        }
-    }
+		private ActorItem(ActorRef actor, Class<?> type) {
+			this.actor = actor;
+			this.type = type;
+			ready = true;
+		}
+	}
 
-    public static class TimeSignal implements Serializable {
-        public final double deltaTime; //seconds
-        public final LocalDateTime time;
-        /**
-         * @param timeDelta time step length in seconds
-         * @param time actual calendar time
-         */
-        public TimeSignal(double timeDelta, LocalDateTime time) {
-            this.deltaTime = timeDelta;
-            this.time = time;
-        }
-        public String toString() {
-            return time.toString() + " (d=" + deltaTime + ")";
-        }
-    }
+	// SIGNALS
 
-    public static class DoneSignal {}
+	public static class StartSimulation {
+		final int timeDelta; // seconds
+		final LocalDateTime time;
+
+		/**
+		 * @param timeDelta
+		 *            time step length in seconds
+		 * @param time
+		 *            actual calendar time
+		 */
+		public StartSimulation(int timeDelta, LocalDateTime time) {
+			this.timeDelta = timeDelta;
+			this.time = time;
+		}
+	}
+
+	public static class StopSimulation {
+	}
+
+	public static class RegisterActorSignal {
+		public final ActorRef actor;
+		public final Class<?> type;
+
+		public RegisterActorSignal(ActorRef rector, Class<?> type) {
+			this.actor = rector;
+			this.type = type;
+		}
+	}
+
+	public static class TimeSignal implements Serializable {
+		public final double deltaTime; // seconds
+		public final LocalDateTime time;
+
+		/**
+		 * @param timeDelta
+		 *            time step length in seconds
+		 * @param time
+		 *            actual calendar time
+		 */
+		public TimeSignal(double timeDelta, LocalDateTime time) {
+			this.deltaTime = timeDelta;
+			this.time = time;
+		}
+
+		public String toString() {
+			return time.toString() + " (d=" + deltaTime + ")";
+		}
+	}
+
+	public static class DoneSignal {
+	}
 }

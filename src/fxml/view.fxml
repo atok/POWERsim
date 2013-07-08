@@ -17,9 +17,9 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Settings">
           <items>
-            <MenuItem mnemonicParsing="false" text="Weather" onAction="#weatherPopup"/>
-            <MenuItem mnemonicParsing="false" text="Database" onAction="#dbPopup"/>
-            <MenuItem mnemonicParsing="false" text="Server" onAction="#serverPopup"/>
+            <MenuItem mnemonicParsing="false" onAction="#weatherPopup" text="Weather" />
+            <MenuItem mnemonicParsing="false" onAction="#dbPopup" text="Database" />
+            <MenuItem mnemonicParsing="false" onAction="#serverPopup" text="Server" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
@@ -29,14 +29,13 @@
         </Menu>
       </menus>
     </MenuBar>
-    <Button layoutX="323.0" layoutY="348.0" mnemonicParsing="false" text="Start" onAction="#run" fx:id="startButton"/>
+    <Button fx:id="startButton" layoutX="323.0" layoutY="348.0" mnemonicParsing="false" onAction="#run" text="Start" />
     <Label fx:id="fileLabel" layoutX="14.0" layoutY="351.0" text="No file loaded ..." />
-    <Button layoutX="150.0" layoutY="349.0" mnemonicParsing="false" onAction="#open" text="Open" fx:id="openButton" />
+    <Button fx:id="openButton" layoutX="150.0" layoutY="349.0" mnemonicParsing="false" onAction="#open" text="Open" />
     <Label layoutX="14.0" layoutY="311.0" text="Duration [days]" />
     <Label layoutX="14.0" layoutY="271.0" text="Delay [ms]" />
     <TextField fx:id="duration" layoutX="150.0" layoutY="311.0" prefWidth="86.0" text="1" />
     <TextField fx:id="delay" layoutX="150.0" layoutY="271.0" prefWidth="86.0" text="100" />
-    <ListView layoutX="236.0" layoutY="57.0" prefHeight="184.0" prefWidth="150.0" />
     <Label layoutX="236.0" layoutY="41.0" style="-fx-font-weight: bold;" text="Logging config" />
     <GridPane layoutX="14.0" layoutY="57.0">
       <children>
@@ -44,8 +43,8 @@
         <Label fx:id="simulationDate" style="-fx-text-fill: #fff;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
       </children>
       <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="98.0" minWidth="10.0" prefWidth="58.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="142.0" minWidth="10.0" prefWidth="142.0" />
       </columnConstraints>
       <rowConstraints>
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -72,6 +71,35 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       </rowConstraints>
     </GridPane>
-    <Label id="" fx:id="alertBox" visible="false" layoutX="15.0" layoutY="228.0" prefWidth="200.0" style="-fx-background-color: red;&#10;-fx-text-fill: white;" />
+    <Label id="" fx:id="alertBox" layoutX="15.0" layoutY="228.0" prefWidth="200.0" style="-fx-background-color: red;&#10;-fx-text-fill: white;" visible="false" />
+    <ScrollPane layoutX="236.0" layoutY="57.0" prefHeight="200.0" prefWidth="143.0">
+      <content>
+        <VBox fx:id="logging" prefHeight="294.0" prefWidth="131.0">
+          <children>
+            <CheckBox mnemonicParsing="false" onAction="#clock" selected="true" text="Clock" />
+            <CheckBox mnemonicParsing="false" onAction="#weather" selected="true" text="Weather" />
+            <Separator prefWidth="200.0" />
+            <CheckBox mnemonicParsing="false" onAction="#house" selected="true" text="House" />
+            <CheckBox mnemonicParsing="false" onAction="#human" selected="true" text="Human" />
+            <Separator prefWidth="200.0" />
+            <CheckBox mnemonicParsing="false" onAction="#dw" selected="true" text="DishWasher" />
+            <CheckBox mnemonicParsing="false" onAction="#eh" selected="true" text="ElectricHeater" />
+            <CheckBox mnemonicParsing="false" onAction="#ek" selected="true" text="ElectricKettle" />
+            <CheckBox mnemonicParsing="false" onAction="#fridge" selected="true" text="Fridge" />
+            <CheckBox mnemonicParsing="false" onAction="#iron" selected="true" text="Iron" />
+            <CheckBox mnemonicParsing="false" onAction="#lamp" selected="true" text="Lamp" />
+            <CheckBox mnemonicParsing="false" onAction="#micro" selected="true" text="Microwave" />
+            <CheckBox mnemonicParsing="false" onAction="#mobileDevice" selected="true" text="MobileDevice" />
+            <CheckBox mnemonicParsing="false" onAction="#oven" selected="true" text="Oven" />
+            <CheckBox mnemonicParsing="false" onAction="#radio" selected="true" text="RadioSet" />
+            <CheckBox mnemonicParsing="false" onAction="#tv" selected="true" text="TelevisionSet" />
+            <CheckBox mnemonicParsing="false" onAction="#wm" selected="true" text="WashingMashine" />
+            <CheckBox mnemonicParsing="false" onAction="#wh" selected="true" text="WaterHeater" />
+            <CheckBox mnemonicParsing="false" onAction="#vc" selected="true" text="VacumCliner" />
+          </children>
+        </VBox>
+      </content>
+    </ScrollPane>
+    <CheckBox fx:id="defaultSim" layoutX="209.0" layoutY="352.0" mnemonicParsing="false" text="Run Default" />
   </children>
 </AnchorPane>

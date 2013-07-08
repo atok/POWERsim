@@ -16,6 +16,7 @@ import akka.event.LoggingAdapter;
 
 public class House extends UntypedActor {
 
+	public static boolean logOn = true;
 	HashMap<ActorRef, HumanStateChanger.StateAndTime> humans = new HashMap<>();
 
 	LoggingAdapter log = Logging.getLogger(getContext().system(), this);
@@ -30,7 +31,8 @@ public class House extends UntypedActor {
 	public void preStart() {
 		super.preStart();
 		getContext().actorFor("akka://SimSystem/user/clock").tell(new ClockActor.RegisterActorSignal(getSelf(), House.class), getSelf());
-		log.error("house started");
+		if (logOn)
+			log.error("house started");
 	}
 
 	@Override
@@ -38,7 +40,8 @@ public class House extends UntypedActor {
 		if (message instanceof ClockActor.TimeSignal) {
 			ClockActor.TimeSignal t = (ClockActor.TimeSignal) message;
 
-			getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t.time, getSelf()), getSelf());
+			if (logOn)
+				getContext().actorFor("akka://SimSystem/user/recorder").tell(new DataRecorder.PowerUsageRecord(powerUsedInThisStep, lightProvidedInThisStep, t.time, getSelf()), getSelf());
 
 			ActorRef last = findLastHuman();
 			for (ActorRef human : humans.keySet()) {
@@ -71,7 +74,8 @@ public class House extends UntypedActor {
 			}
 			// log.warning("HEAT: "+heatProvidedInThisStep);
 		} else if (message instanceof RegisterForState) {
-			//humans.put(getSender(), new HumanStateChanger.StateAndTime(null, null));
+			// humans.put(getSender(), new HumanStateChanger.StateAndTime(null,
+			// null));
 		} else if (message instanceof Human.HumanStateNotice) {
 			Human.HumanStateNotice msg = (Human.HumanStateNotice) message;
 			humans.put(msg.sender, msg.stateAndTime);
@@ -89,9 +93,11 @@ public class House extends UntypedActor {
 				currentLastStateAndTime = humans.get(human);
 			}
 			StateAndTime stateAndTime = humans.get(human);
+
 			if (stateAndTime.state == null || stateAndTime.state.equals(HumanState.INSIDE)) {
 				if (stateAndTime.state != null && stateAndTime.state.equals(currentLastStateAndTime.state)) {
-					if (stateAndTime.time.isAfter(currentLastStateAndTime.time)) {
+
+					if (stateAndTime.time != null && stateAndTime.time.isAfter(currentLastStateAndTime.time)) {
 						currentLast = human;
 						currentLastStateAndTime = stateAndTime;
 					}
